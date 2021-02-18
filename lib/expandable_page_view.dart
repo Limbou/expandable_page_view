@@ -96,6 +96,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   Widget _buildPageView() {
     if (isBuilder) {
       return PageView.builder(
+        key: widget.key,
         controller: _pageController,
         itemBuilder: _itemBuilder,
         itemCount: widget.itemCount,
@@ -110,6 +111,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
       );
     }
     return PageView(
+      key: widget.key,
       controller: _pageController,
       children: _sizeReportingChildren(),
       onPageChanged: widget.onPageChanged,
