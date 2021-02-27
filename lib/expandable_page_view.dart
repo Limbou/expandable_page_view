@@ -60,6 +60,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   List<double> _heights;
   int _currentPage = 0;
   int _previousPage = 0;
+  bool _shouldDisposePageController = false;
 
   double get _currentHeight => _heights[_currentPage];
 
@@ -73,12 +74,15 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     super.initState();
     _pageController = widget.controller ?? PageController();
     _pageController.addListener(_updatePage);
+    _shouldDisposePageController = widget.controller == null;
   }
 
   @override
   void dispose() {
     _pageController.removeListener(_updatePage);
-    _pageController.dispose();
+    if (_shouldDisposePageController) {
+      _pageController.dispose();
+    }
     super.dispose();
   }
 
