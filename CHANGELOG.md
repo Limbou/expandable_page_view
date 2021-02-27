@@ -1,3 +1,7 @@
+## 1.0.3
+
+* Updated README.
+
 ## 1.0.2
 
 * Added `animateFirstPage` flag which decided whether or not `ExpandablePageView` should animate when building the initial page.
