@@ -1,3 +1,9 @@
+## 1.0.2
+
+* Added `animateFirstPage` flag which decided whether or not `ExpandablePageView` should animate when building the initial page.
+* Added `estimatedPageSize` field which helps reduce the problem of "Shrink and expand" for more expensive pages.
+* Removed disposing of PageController if it was passed by the parent.
+
 ## 1.0.1
 
 * Added missing key for PageView
