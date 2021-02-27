@@ -74,9 +74,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     super.initState();
     _pageController = widget.controller ?? PageController();
     _pageController.addListener(_updatePage);
-    if (widget.controller == null) {
-      _shouldDisposePageController = true;
-    }
+    _shouldDisposePageController = widget.controller == null;
   }
 
   @override
