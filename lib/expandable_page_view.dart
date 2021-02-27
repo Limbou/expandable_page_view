@@ -20,6 +20,29 @@ class ExpandablePageView extends StatefulWidget {
   final String restorationId;
   final Clip clipBehavior;
 
+  /// Whether to animate the first page displayed by this widget.
+  ///
+  /// By default (false) [ExpandablePageView] will resize to the size of it's
+  /// initially displayed page without any animation.
+  final bool animateFirstPage;
+
+  /// The estimated size of displayed pages.
+  ///
+  /// This property can be used to indicate how big a page will be more or less.
+  /// By default (0.0) all pages will have their initial sizes set to 0.0
+  /// until they report that their size changed, which will result in
+  /// [ExpandablePageView] size animation. This can lead to a behaviour
+  /// when after changing the page, [ExpandablePageView] will first shrink to 0.0
+  /// and then animate to the size of the page.
+  ///
+  /// For example: If there is certainty that most pages displayed by [ExpandablePageView]
+  /// will vary from 200 to 600 in size, then [estimatedPageSize] could be set to some
+  /// value in that range, to at least partially remove the "shrink and expand" effect.
+  ///
+  /// Setting it to a value much bigger than most pages' sizes might result in a
+  /// reversed - "expand and shrink" - effect.
+  final double estimatedPageSize;
+
   ExpandablePageView({
     this.children,
     this.itemCount,
@@ -35,6 +58,8 @@ class ExpandablePageView extends StatefulWidget {
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
+    this.animateFirstPage = false,
+    this.estimatedPageSize = 0.0,
     Key key,
   })  : assert(
             (children != null && itemCount == null && itemBuilder == null) ||
@@ -49,6 +74,8 @@ class ExpandablePageView extends StatefulWidget {
         assert(dragStartBehavior != null),
         assert(allowImplicitScrolling != null),
         assert(clipBehavior != null),
+        assert(animateFirstPage != null),
+        assert(estimatedPageSize != null && estimatedPageSize >= 0.0),
         super(key: key);
 
   @override
@@ -61,6 +88,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   int _currentPage = 0;
   int _previousPage = 0;
   bool _shouldDisposePageController = false;
+  bool _firstPageLoaded = false;
 
   double get _currentHeight => _heights[_currentPage];
 
@@ -90,11 +118,18 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
       curve: widget.animationCurve,
-      duration: widget.animationDuration,
+      duration: _getDuration(),
       tween: Tween<double>(begin: _previousHeight, end: _currentHeight),
       builder: (context, value, child) => SizedBox(height: value, child: child),
       child: _buildPageView(),
     );
+  }
+
+  Duration _getDuration() {
+    if (_firstPageLoaded) {
+      return widget.animationDuration;
+    }
+    return widget.animateFirstPage ? widget.animationDuration : Duration.zero;
   }
 
   Widget _buildPageView() {
@@ -131,15 +166,16 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
 
   List<double> _prepareHeights() {
     if (!isBuilder) {
-      return widget.children.map((child) => 0.0).toList();
+      return widget.children.map((child) => widget.estimatedPageSize).toList();
     }
-    return List.filled(widget.itemCount, 0.0);
+    return List.filled(widget.itemCount, widget.estimatedPageSize);
   }
 
   void _updatePage() {
     final newPage = _pageController.page.round();
     if (_currentPage != newPage) {
       setState(() {
+        _firstPageLoaded = true;
         _previousPage = _currentPage;
         _currentPage = newPage;
       });

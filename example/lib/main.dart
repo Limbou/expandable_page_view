@@ -46,9 +46,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
               ExpandablePageView(
+                animateFirstPage: true,
+                estimatedPageSize: 100,
                 itemCount: 3,
                 itemBuilder: (context, index) {
-                  return ExamplePage(Colors.blue, index.toString(), index * 100.0);
+                  return ExamplePage(Colors.blue, index.toString(), (index + 1) * 100.0);
                 },
               ),
               const SizedBox(height: 20),
