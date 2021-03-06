@@ -11,7 +11,7 @@ In the `pubspec.yaml` of your flutter project, add the following dependency:
 ```yaml
 dependencies:
   ...
-  expandable_page_view: ^1.0.0
+  expandable_page_view: ^1.0.2
 ```
 
 Import it:
@@ -44,7 +44,7 @@ If You have multiple pages to display and You want to build them dynamically whi
 ExpandablePageView(
   itemCount: 3,
   itemBuilder: (context, index) {
-    return ExamplePage(Colors.blue, index.toString(), index * 100.0);
+    return ExamplePage(Colors.blue, index.toString(), (index + 1) * 100.0);
   },
 ),
 ```
