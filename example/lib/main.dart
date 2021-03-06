@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
@@ -50,7 +50,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 estimatedPageSize: 100,
                 itemCount: 3,
                 itemBuilder: (context, index) {
-                  return ExamplePage(Colors.blue, index.toString(), (index + 1) * 100.0);
+                  return ExamplePage(
+                    Colors.blue,
+                    index.toString(),
+                    (index + 1) * 100.0,
+                  );
                 },
               ),
               const SizedBox(height: 20),

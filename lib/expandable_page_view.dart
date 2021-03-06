@@ -5,19 +5,19 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class ExpandablePageView extends StatefulWidget {
-  final List<Widget> children;
-  final int itemCount;
-  final Widget Function(BuildContext, int) itemBuilder;
-  final PageController controller;
-  final ValueChanged<int> onPageChanged;
+  final List<Widget>? children;
+  final int? itemCount;
+  final Widget Function(BuildContext, int)? itemBuilder;
+  final PageController? controller;
+  final ValueChanged<int>? onPageChanged;
   final bool reverse;
   final Duration animationDuration;
   final Curve animationCurve;
-  final ScrollPhysics physics;
+  final ScrollPhysics? physics;
   final bool pageSnapping;
   final DragStartBehavior dragStartBehavior;
   final bool allowImplicitScrolling;
-  final String restorationId;
+  final String? restorationId;
   final Clip clipBehavior;
 
   /// Whether to animate the first page displayed by this widget.
@@ -60,22 +60,14 @@ class ExpandablePageView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.animateFirstPage = false,
     this.estimatedPageSize = 0.0,
-    Key key,
+    Key? key,
   })  : assert(
             (children != null && itemCount == null && itemBuilder == null) ||
                 (children == null && itemCount != null && itemBuilder != null),
             "Cannot provide both children and itemBuilder\n"
             "If you need a fixed PageView, use children\n"
             "If you need a dynamically built PageView, use itemBuilder and itemCount"),
-        assert(reverse != null),
-        assert(animationDuration != null),
-        assert(animationCurve != null),
-        assert(pageSnapping != null),
-        assert(dragStartBehavior != null),
-        assert(allowImplicitScrolling != null),
-        assert(clipBehavior != null),
-        assert(animateFirstPage != null),
-        assert(estimatedPageSize != null && estimatedPageSize >= 0.0),
+        assert(estimatedPageSize >= 0.0),
         super(key: key);
 
   @override
@@ -83,8 +75,8 @@ class ExpandablePageView extends StatefulWidget {
 }
 
 class _ExpandablePageViewState extends State<ExpandablePageView> {
-  PageController _pageController;
-  List<double> _heights;
+  late PageController _pageController;
+  late List<double> _heights;
   int _currentPage = 0;
   int _previousPage = 0;
   bool _shouldDisposePageController = false;
@@ -165,14 +157,15 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   }
 
   List<double> _prepareHeights() {
-    if (!isBuilder) {
-      return widget.children.map((child) => widget.estimatedPageSize).toList();
+    if (isBuilder) {
+      return List.filled(widget.itemCount!, widget.estimatedPageSize);
+    } else {
+      return widget.children!.map((child) => widget.estimatedPageSize).toList();
     }
-    return List.filled(widget.itemCount, widget.estimatedPageSize);
   }
 
   void _updatePage() {
-    final newPage = _pageController.page.round();
+    final newPage = _pageController.page!.round();
     if (_currentPage != newPage) {
       setState(() {
         _firstPageLoaded = true;
@@ -183,20 +176,21 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
-    final item = widget.itemBuilder(context, index);
+    final item = widget.itemBuilder!(context, index);
     return OverflowPage(
-      onSizeChange: (size) => setState(() => _heights[index] = size?.height ?? 0),
+      onSizeChange: (size) => setState(() => _heights[index] = size.height),
       child: item,
     );
   }
 
-  List<Widget> _sizeReportingChildren() => widget.children
+  List<Widget> _sizeReportingChildren() => widget.children!
       .asMap()
       .map(
         (index, child) => MapEntry(
           index,
           OverflowPage(
-            onSizeChange: (size) => setState(() => _heights[index] = size?.height ?? 0),
+            onSizeChange: (size) =>
+                setState(() => _heights[index] = size.height),
             child: child,
           ),
         ),
@@ -209,7 +203,10 @@ class OverflowPage extends StatelessWidget {
   final ValueChanged<Size> onSizeChange;
   final Widget child;
 
-  const OverflowPage({@required this.onSizeChange, @required this.child});
+  const OverflowPage({
+    required this.onSizeChange,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
