@@ -1,3 +1,7 @@
+## 1.0.4
+
+* Added null safety.
+
 ## 1.0.3
 
 * Updated README.
