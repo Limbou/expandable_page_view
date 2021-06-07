@@ -32,36 +32,37 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            ExpandablePageView(
+              children: [
+                ExamplePage(Colors.blue, "1", 100),
+                ExamplePage(Colors.green, "2", 200),
+                ExamplePage(Colors.red, "3", 300),
+              ],
+            ),
+            ExpandablePageView(
+              animateFirstPage: true,
+              estimatedPageSize: 100,
+              itemCount: 3,
+              itemBuilder: (context, index) {
+                return ExamplePage(
+                  Colors.blue,
+                  index.toString(),
+                  (index + 1) * 100.0,
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+            Text("UNDER PAGE VIEW WIDGET"),
+          ],
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              ExpandablePageView(
-                children: [
-                  ExamplePage(Colors.blue, "1", 100),
-                  ExamplePage(Colors.green, "2", 200),
-                  ExamplePage(Colors.red, "3", 300),
-                ],
-              ),
-              ExpandablePageView(
-                animateFirstPage: true,
-                estimatedPageSize: 100,
-                itemCount: 3,
-                itemBuilder: (context, index) {
-                  return ExamplePage(
-                    Colors.blue,
-                    index.toString(),
-                    (index + 1) * 100.0,
-                  );
-                },
-              ),
-              const SizedBox(height: 20),
-              Text("UNDER PAGE VIEW WIDGET"),
-            ],
-          ),
-        ));
+      ),
+    );
   }
 }
 
