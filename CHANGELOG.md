@@ -1,3 +1,7 @@
+## 1.0.5
+
+* Fixed `IndexOutOfBounds` error if children list's length or itemCount was changed to different value from stateful widget.
+
 ## 1.0.4
 
 * Added null safety.
