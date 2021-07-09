@@ -94,6 +94,8 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     _heights = _prepareHeights();
     _pageController = widget.controller ?? PageController();
     _pageController.addListener(_updatePage);
+    _currentPage = _pageController.initialPage;
+    _previousPage = _currentPage - 1 < 0 ? 0 : _currentPage - 1;
     _shouldDisposePageController = widget.controller == null;
   }
 
