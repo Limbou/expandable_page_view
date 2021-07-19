@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 class ExpandablePageView extends StatefulWidget {
   final List<Widget>? children;
   final int? itemCount;
-  final Widget Function(BuildContext, int)? itemBuilder;
+  final Widget Function(BuildContext context, int index)? itemBuilder;
   final PageController? controller;
   final ValueChanged<int>? onPageChanged;
   final bool reverse;
