@@ -45,7 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ExamplePage(Colors.red, "3", 300),
               ],
             ),
-            ExpandablePageView(
+            ExpandablePageView.builder(
               animateFirstPage: true,
               estimatedPageSize: 100,
               itemCount: 3,
