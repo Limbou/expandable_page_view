@@ -5,19 +5,74 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class ExpandablePageView extends StatefulWidget {
+  /// List of widgets to display
+  ///
+  /// Corresponds to Material's PageView's children parameter: https://api.flutter.dev/flutter/widgets/PageView-class.html
   final List<Widget>? children;
+
+  /// Number of widgets to display
+  ///
+  /// Corresponds to Material PageView's itemCount parameter: https://api.flutter.dev/flutter/widgets/PageView-class.html
   final int? itemCount;
+
+  /// Item builder function
+  ///
+  /// Corresponds to Material's PageView's itemBuilder parameter: https://api.flutter.dev/flutter/widgets/PageView-class.html
   final Widget Function(BuildContext context, int index)? itemBuilder;
+
+  /// An object that can be used to control the position to which this page view is scrolled.
+  ///
+  /// Corresponds to Material's PageView's controller parameter: https://api.flutter.dev/flutter/widgets/PageView-class.html
   final PageController? controller;
+
+  /// Called whenever the page in the center of the viewport changes.
+  ///
+  /// Corresponds to Material's PageView's onPageChanged parameter: https://api.flutter.dev/flutter/widgets/PageView-class.html
   final ValueChanged<int>? onPageChanged;
+
+  /// Whether the page view scrolls in the reading direction.
+  ///
+  /// Corresponds to Material's PageView's reverse parameter: https://api.flutter.dev/flutter/widgets/PageView-class.html
   final bool reverse;
+
+  /// Duration of PageView resize animation upon page change
+  ///
+  /// Defaults to [100 milliseconds]
   final Duration animationDuration;
+
+  /// Curve use for PageView resize animation upon page change
+  ///
+  /// Defaults to [Curves.easeInOutCubic]
   final Curve animationCurve;
+
+  /// How the page view should respond to user input.
+  ///
+  /// Corresponds to Material's PageView's physics parameter: https://api.flutter.dev/flutter/widgets/PageView-class.html
   final ScrollPhysics? physics;
+
+  /// Set to false to disable page snapping, useful for custom scroll behavior.
+  ///
+  /// Corresponds to Material's PageView's pageSnapping parameter: https://api.flutter.dev/flutter/widgets/PageView-class.html
   final bool pageSnapping;
+
+  /// Determines the way that drag start behavior is handled.
+  ///
+  /// Corresponds to Material's PageView's dragStartBehavior parameter: https://api.flutter.dev/flutter/widgets/PageView-class.html
   final DragStartBehavior dragStartBehavior;
+
+  /// Controls whether the widget's pages will respond to [RenderObject.showOnScreen], which will allow for implicit accessibility scrolling.
+  ///
+  /// Corresponds to Material's PageView's allowImplicitScrolling parameter: https://api.flutter.dev/flutter/widgets/PageView-class.html
   final bool allowImplicitScrolling;
+
+  /// Restoration ID to save and restore the scroll offset of the scrollable.
+  ///
+  /// Corresponds to Material's PageView's restorationId parameter: https://api.flutter.dev/flutter/widgets/PageView-class.html
   final String? restorationId;
+
+  /// The content will be clipped (or not) according to this option.
+  ///
+  /// Corresponds to Material's PageView's clipBehavior parameter: https://api.flutter.dev/flutter/widgets/PageView-class.html
   final Clip clipBehavior;
 
   /// Whether to animate the first page displayed by this widget.
@@ -45,6 +100,26 @@ class ExpandablePageView extends StatefulWidget {
 
   ExpandablePageView({
     this.children,
+    this.controller,
+    this.onPageChanged,
+    this.reverse = false,
+    this.animationDuration = const Duration(milliseconds: 100),
+    this.animationCurve = Curves.easeInOutCubic,
+    this.physics,
+    this.pageSnapping = true,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.allowImplicitScrolling = false,
+    this.restorationId,
+    this.clipBehavior = Clip.hardEdge,
+    this.animateFirstPage = false,
+    this.estimatedPageSize = 0.0,
+    Key? key,
+  })  : assert(estimatedPageSize >= 0.0),
+        itemBuilder = null,
+        itemCount = null,
+        super(key: key);
+
+  ExpandablePageView.builder({
     this.itemCount,
     this.itemBuilder,
     this.controller,
@@ -61,13 +136,8 @@ class ExpandablePageView extends StatefulWidget {
     this.animateFirstPage = false,
     this.estimatedPageSize = 0.0,
     Key? key,
-  })  : assert(
-            (children != null && itemCount == null && itemBuilder == null) ||
-                (children == null && itemCount != null && itemBuilder != null),
-            "Cannot provide both children and itemBuilder\n"
-            "If you need a fixed PageView, use children\n"
-            "If you need a dynamically built PageView, use itemBuilder and itemCount"),
-        assert(estimatedPageSize >= 0.0),
+  })  : assert(estimatedPageSize >= 0.0),
+        children = null,
         super(key: key);
 
   @override

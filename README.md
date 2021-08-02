@@ -11,7 +11,7 @@ In the `pubspec.yaml` of your flutter project, add the following dependency:
 ```yaml
 dependencies:
   ...
-  expandable_page_view: ^1.0.5
+  expandable_page_view: ^1.0.6
 ```
 
 Import it:
@@ -38,10 +38,10 @@ ExpandablePageView(
 
 ### Dynamically built Expandable Page View
 
-If You have multiple pages to display and You want to build them dynamically while scrolling, pass `itemCount` and `itemBuilder` parameters:
+If You have multiple pages to display and You want to build them dynamically while scrolling, use `.builder`  constructor and pass `itemCount` and `itemBuilder` parameters:
 
 ```dart
-ExpandablePageView(
+ExpandablePageView.builder(
   itemCount: 3,
   itemBuilder: (context, index) {
     return ExamplePage(Colors.blue, index.toString(), (index + 1) * 100.0);
