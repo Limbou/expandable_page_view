@@ -81,6 +81,9 @@ class ExpandablePageView extends StatefulWidget {
   /// initially displayed page without any animation.
   final bool animateFirstPage;
 
+  /// Determines the alignment of the content when animating. Useful when building centered or bottom-aligned PageViews.
+  final Alignment alignment;
+
   /// The estimated size of displayed pages.
   ///
   /// This property can be used to indicate how big a page will be more or less.
@@ -113,6 +116,7 @@ class ExpandablePageView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.animateFirstPage = false,
     this.estimatedPageSize = 0.0,
+    this.alignment = Alignment.topCenter,
     Key? key,
   })  : assert(estimatedPageSize >= 0.0),
         itemBuilder = null,
@@ -135,6 +139,7 @@ class ExpandablePageView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.animateFirstPage = false,
     this.estimatedPageSize = 0.0,
+    this.alignment = Alignment.topCenter,
     Key? key,
   })  : assert(estimatedPageSize >= 0.0),
         children = null,
@@ -275,6 +280,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     return OverflowPage(
       onSizeChange: (size) => setState(() => _heights[index] = size.height),
       child: item,
+      alignment: widget.alignment,
     );
   }
 
@@ -284,8 +290,11 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
         (index, child) => MapEntry(
           index,
           OverflowPage(
-            onSizeChange: (size) => setState(() => _heights[index] = size.height),
+            onSizeChange: (size) => setState(
+              () => _heights[index] = size.height,
+            ),
             child: child,
+            alignment: widget.alignment,
           ),
         ),
       )
@@ -296,10 +305,12 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
 class OverflowPage extends StatelessWidget {
   final ValueChanged<Size> onSizeChange;
   final Widget child;
+  final Alignment alignment;
 
   const OverflowPage({
     required this.onSizeChange,
     required this.child,
+    required this.alignment,
   });
 
   @override
@@ -307,7 +318,7 @@ class OverflowPage extends StatelessWidget {
     return OverflowBox(
       minHeight: 0,
       maxHeight: double.infinity,
-      alignment: Alignment.topCenter,
+      alignment: alignment,
       child: SizeReportingWidget(
         onSizeChange: onSizeChange,
         child: child,
