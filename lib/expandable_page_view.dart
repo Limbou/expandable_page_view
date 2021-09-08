@@ -1,5 +1,7 @@
 library expandable_page_view;
 
+import 'dart:math';
+
 import 'package:expandable_page_view/size_reporting_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -186,7 +188,11 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     if (_shouldReinitializeHeights(oldWidget)) {
       final currentPageHeight = _heights[_currentPage];
       _heights = _prepareHeights();
-      _heights[_currentPage] = currentPageHeight;
+      
+      // _prepareHeights may change the _heights list size, resulting in a
+      // RangeError when dropping the last item on the list. This protects
+      // against that possible error
+      _heights[max(widget.itemCount - 1, _currentPage)] = currentPageHeight;
     }
   }
 
