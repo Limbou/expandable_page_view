@@ -189,6 +189,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
       
       if (_currentPage >= _heights.length) {
         _currentPage--;
+        widget.onPageChanged?.call(_currentPage);
         
         if (_previousPage > 0) {
           _previousPage--;
