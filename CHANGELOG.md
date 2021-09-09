@@ -1,3 +1,8 @@
+## 1.0.7
+
+* Added `alignment` property
+* Fixed RangeError when children amount decreased
+
 ## 1.0.6
 
 * Fixed wrong index displayed if initial index is different from 0
