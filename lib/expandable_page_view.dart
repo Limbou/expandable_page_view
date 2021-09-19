@@ -101,6 +101,20 @@ class ExpandablePageView extends StatefulWidget {
   /// reversed - "expand and shrink" - effect.
   final double estimatedPageSize;
 
+  ///A ScrollBehavior that will be applied to this widget individually.
+  //
+  // Defaults to null, wherein the inherited ScrollBehavior is copied and modified to alter the viewport decoration, like Scrollbars.
+  //
+  // ScrollBehaviors also provide ScrollPhysics. If an explicit ScrollPhysics is provided in physics, it will take precedence, followed by scrollBehavior, and then the inherited ancestor ScrollBehavior.
+  //
+  // The ScrollBehavior of the inherited ScrollConfiguration will be modified by default to not apply a Scrollbar.
+  final ScrollBehavior? scrollBehavior;
+
+  ///The axis along which the page view scrolls.
+  //
+  // Defaults to Axis.horizontal.
+  final Axis scrollDirection;
+
   ExpandablePageView({
     this.children,
     this.controller,
@@ -117,6 +131,8 @@ class ExpandablePageView extends StatefulWidget {
     this.animateFirstPage = false,
     this.estimatedPageSize = 0.0,
     this.alignment = Alignment.topCenter,
+    this.scrollBehavior,
+    this.scrollDirection = Axis.horizontal,
     Key? key,
   })  : assert(estimatedPageSize >= 0.0),
         itemBuilder = null,
@@ -140,6 +156,8 @@ class ExpandablePageView extends StatefulWidget {
     this.animateFirstPage = false,
     this.estimatedPageSize = 0.0,
     this.alignment = Alignment.topCenter,
+    this.scrollBehavior,
+    this.scrollDirection = Axis.horizontal,
     Key? key,
   })  : assert(estimatedPageSize >= 0.0),
         children = null,
@@ -186,11 +204,11 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     if (_shouldReinitializeHeights(oldWidget)) {
       final currentPageHeight = _heights[_currentPage];
       _heights = _prepareHeights();
-      
+
       if (_currentPage >= _heights.length) {
         _currentPage--;
         widget.onPageChanged?.call(_currentPage);
-        
+
         if (_previousPage > 0) {
           _previousPage--;
         }
@@ -249,6 +267,8 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
         allowImplicitScrolling: widget.allowImplicitScrolling,
         restorationId: widget.restorationId,
         clipBehavior: widget.clipBehavior,
+        scrollBehavior: widget.scrollBehavior,
+        scrollDirection: widget.scrollDirection,
       );
     }
     return PageView(
@@ -263,6 +283,8 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
       allowImplicitScrolling: widget.allowImplicitScrolling,
       restorationId: widget.restorationId,
       clipBehavior: widget.clipBehavior,
+      scrollBehavior: widget.scrollBehavior,
+      scrollDirection: widget.scrollDirection,
     );
   }
 
