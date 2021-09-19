@@ -1,6 +1,6 @@
 name: expandable_page_view
 description: A PageView widget adjusting it's height to currently displayed page
-version: 1.0.7
+version: 1.0.8
 homepage: https://github.com/Limbou/expandable_page_view
 
 environment:

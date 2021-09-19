@@ -1,3 +1,8 @@
+## 1.0.8
+
+* Added `scrollDirection` property
+* Added `scrollBehavior` property
+
 ## 1.0.7
 
 * Added `alignment` property

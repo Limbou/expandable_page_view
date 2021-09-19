@@ -1,6 +1,6 @@
 # expandable_page_view
 
-A PageView widget adjusting it's height to currently displayed page. It accepts the same parameters as classic PageView.
+A PageView widget adjusting its height to currently displayed page. It accepts the same parameters as classic PageView.
 
 ![Expandable Page View](https://media.giphy.com/media/21kOnh5gH0XcjBdcSx/giphy.gif)
 
@@ -11,7 +11,7 @@ In the `pubspec.yaml` of your flutter project, add the following dependency:
 ```yaml
 dependencies:
   ...
-  expandable_page_view: ^1.0.7
+  expandable_page_view: ^1.0.8
 ```
 
 Import it:
@@ -38,7 +38,7 @@ ExpandablePageView(
 
 ### Dynamically built Expandable Page View
 
-If You have multiple pages to display and You want to build them dynamically while scrolling, use `.builder`  constructor and pass `itemCount` and `itemBuilder` parameters:
+If You have multiple pages to display, and You want to build them dynamically while scrolling, use `.builder`  constructor and pass `itemCount` and `itemBuilder` parameters:
 
 ```dart
 ExpandablePageView.builder(
