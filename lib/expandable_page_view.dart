@@ -115,6 +115,17 @@ class ExpandablePageView extends StatefulWidget {
   // Defaults to Axis.horizontal.
   final Axis scrollDirection;
 
+  /// Whether to add padding to both ends of the list.
+  ///
+  /// If this is set to true and [PageController.viewportFraction] < 1.0, padding will be added
+  /// such that the first and last child slivers will be in the center of
+  /// the viewport when scrolled all the way to the start or end, respectively.
+  ///
+  /// If [PageController.viewportFraction] >= 1.0, this property has no effect.
+  ///
+  /// This property defaults to true and must not be null.
+  final bool padEnds;
+
   ExpandablePageView({
     this.children,
     this.controller,
@@ -133,6 +144,7 @@ class ExpandablePageView extends StatefulWidget {
     this.alignment = Alignment.topCenter,
     this.scrollBehavior,
     this.scrollDirection = Axis.horizontal,
+    this.padEnds = true,
     Key? key,
   })  : assert(estimatedPageSize >= 0.0),
         itemBuilder = null,
@@ -158,6 +170,7 @@ class ExpandablePageView extends StatefulWidget {
     this.alignment = Alignment.topCenter,
     this.scrollBehavior,
     this.scrollDirection = Axis.horizontal,
+    this.padEnds = true,
     Key? key,
   })  : assert(estimatedPageSize >= 0.0),
         children = null,
@@ -269,6 +282,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
         clipBehavior: widget.clipBehavior,
         scrollBehavior: widget.scrollBehavior,
         scrollDirection: widget.scrollDirection,
+        padEnds: widget.padEnds,
       );
     }
     return PageView(
@@ -285,6 +299,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
       clipBehavior: widget.clipBehavior,
       scrollBehavior: widget.scrollBehavior,
       scrollDirection: widget.scrollDirection,
+      padEnds: widget.padEnds,
     );
   }
 
