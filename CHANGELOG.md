@@ -1,3 +1,7 @@
+## 1.0.9
+
+* Added `padEnds` property
+
 ## 1.0.8
 
 * Added `scrollDirection` property

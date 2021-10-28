@@ -11,7 +11,7 @@ In the `pubspec.yaml` of your flutter project, add the following dependency:
 ```yaml
 dependencies:
   ...
-  expandable_page_view: ^1.0.8
+  expandable_page_view: ^1.0.9
 ```
 
 Import it:
