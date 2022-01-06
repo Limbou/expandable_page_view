@@ -1,3 +1,8 @@
+## 1.0.10
+
+* Fixed range error displaying after decreasing the number of pages in ExpandablePageView
+* Added tests
+
 ## 1.0.9
 
 * Added `padEnds` property
