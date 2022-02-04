@@ -17,7 +17,7 @@ dependencies:
 Import it:
 
 ```dart
-import 'package:expandable_page_view/expandable_page_view_test.dart';
+import 'package:expandable_page_view/expandable_page_view.dart';
 ```
 
 ## Usage Examples
