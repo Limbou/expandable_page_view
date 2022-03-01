@@ -11,13 +11,13 @@ In the `pubspec.yaml` of your flutter project, add the following dependency:
 ```yaml
 dependencies:
   ...
-  expandable_page_view: ^1.0.10
+  expandable_page_view: ^1.0.11
 ```
 
 Import it:
 
 ```dart
-import 'package:expandable_page_view/expandable_page_view_test.dart';
+import 'package:expandable_page_view/expandable_page_view.dart';
 ```
 
 ## Usage Examples
@@ -49,4 +49,4 @@ ExpandablePageView.builder(
 ),
 ```
 
-Check out [example project](https://github.com/Limbou/expandable_page_view/blob/main/README.md) to play with ExpandablePageView.
+Check out [example project](https://github.com/Limbou/expandable_page_view/tree/main/example) to play with ExpandablePageView.
