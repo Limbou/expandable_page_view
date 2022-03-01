@@ -1,3 +1,7 @@
+## 1.0.11
+
+* Update to support flutter version 2.10.2 and new Android version
+
 ## 1.0.10
 
 * Fixed range error displaying after decreasing the number of pages in ExpandablePageView
