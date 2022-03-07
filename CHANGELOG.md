@@ -1,3 +1,7 @@
+## 1.0.12
+
+* Reformat package code to get higher static analysis score
+
 ## 1.0.11
 
 * Update to support flutter version 2.10.2 and new Android version
