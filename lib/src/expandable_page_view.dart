@@ -223,7 +223,8 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
         _currentPage = _heights.length - 1;
         widget.onPageChanged?.call(_currentPage);
 
-        _previousPage = (_currentPage + differenceFromPreviousToCurrent).clamp(0, _heights.length - 1);
+        _previousPage = (_currentPage + differenceFromPreviousToCurrent)
+            .clamp(0, _heights.length - 1);
       }
 
       _heights[_currentPage] = currentPageHeight;
