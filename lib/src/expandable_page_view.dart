@@ -4,6 +4,8 @@ import 'package:expandable_page_view/src/size_reporting_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+typedef WidgetBuilder = Widget Function(BuildContext context, int index);
+
 class ExpandablePageView extends StatefulWidget {
   /// List of widgets to display
   ///
@@ -18,7 +20,7 @@ class ExpandablePageView extends StatefulWidget {
   /// Item builder function
   ///
   /// Corresponds to Material's PageView's itemBuilder parameter: https://api.flutter.dev/flutter/widgets/PageView-class.html
-  final Widget Function(BuildContext context, int index)? itemBuilder;
+  final WidgetBuilder? itemBuilder;
 
   /// An object that can be used to control the position to which this page view is scrolled.
   ///
@@ -127,7 +129,7 @@ class ExpandablePageView extends StatefulWidget {
   final bool padEnds;
 
   ExpandablePageView({
-    this.children,
+    required List<Widget> children,
     this.controller,
     this.onPageChanged,
     this.reverse = false,
@@ -147,13 +149,14 @@ class ExpandablePageView extends StatefulWidget {
     this.padEnds = true,
     Key? key,
   })  : assert(estimatedPageSize >= 0.0),
+        children = children,
         itemBuilder = null,
         itemCount = null,
         super(key: key);
 
   ExpandablePageView.builder({
-    this.itemCount,
-    this.itemBuilder,
+    required int itemCount,
+    required WidgetBuilder itemBuilder,
     this.controller,
     this.onPageChanged,
     this.reverse = false,
@@ -174,6 +177,8 @@ class ExpandablePageView extends StatefulWidget {
     Key? key,
   })  : assert(estimatedPageSize >= 0.0),
         children = null,
+        itemCount = itemCount,
+        itemBuilder = itemBuilder,
         super(key: key);
 
   @override
@@ -215,19 +220,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
       _shouldDisposePageController = widget.controller == null;
     }
     if (_shouldReinitializeHeights(oldWidget)) {
-      final currentPageHeight = _heights[_currentPage];
-      _heights = _prepareHeights();
-
-      if (_currentPage >= _heights.length) {
-        final differenceFromPreviousToCurrent = _previousPage - _currentPage;
-        _currentPage = _heights.length - 1;
-        widget.onPageChanged?.call(_currentPage);
-
-        _previousPage = (_currentPage + differenceFromPreviousToCurrent)
-            .clamp(0, _heights.length - 1);
-      }
-
-      _heights[_currentPage] = currentPageHeight;
+      _reinitializeHeights();
     }
   }
 
@@ -256,6 +249,22 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
       return oldWidget.itemCount != widget.itemCount;
     }
     return oldWidget.children?.length != widget.children?.length;
+  }
+
+  void _reinitializeHeights() {
+    final currentPageHeight = _heights[_currentPage];
+    _heights = _prepareHeights();
+
+    if (_currentPage >= _heights.length) {
+      final differenceFromPreviousToCurrent = _previousPage - _currentPage;
+      _currentPage = _heights.length - 1;
+      widget.onPageChanged?.call(_currentPage);
+
+      _previousPage = (_currentPage + differenceFromPreviousToCurrent)
+          .clamp(0, _heights.length - 1);
+    }
+
+    _heights[_currentPage] = currentPageHeight;
   }
 
   Duration _getDuration() {
