@@ -1,3 +1,8 @@
+## 1.0.13
+
+* Make `children` parameter required for default constructor
+* Make `itemCount` and `itemBuilder` parameters required for `.builder` constructor
+
 ## 1.0.12
 
 * Reformat package code to get higher static analysis score
