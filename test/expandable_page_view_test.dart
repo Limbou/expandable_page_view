@@ -10,9 +10,12 @@ const previousPageScrollOffset = Offset(500, 0);
 const screenSize = Size(800, 600);
 
 void main() {
-  final redContainer = find.byWidgetPredicate((widget) => widget is Container && widget.color == Colors.red);
-  final blueContainer = find.byWidgetPredicate((widget) => widget is Container && widget.color == Colors.blue);
-  final greenContainer = find.byWidgetPredicate((widget) => widget is Container && widget.color == Colors.green);
+  final redContainer = find.byWidgetPredicate(
+      (widget) => widget is Container && widget.color == Colors.red);
+  final blueContainer = find.byWidgetPredicate(
+      (widget) => widget is Container && widget.color == Colors.blue);
+  final greenContainer = find.byWidgetPredicate(
+      (widget) => widget is Container && widget.color == Colors.green);
 
   group("ExpandablePageView", () {
     testWidgets('''given there is only one child
