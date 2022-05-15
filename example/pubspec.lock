@@ -49,14 +49,14 @@ packages:
       name: cupertino_icons
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.2"
+    version: "1.0.4"
   expandable_page_view:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "1.0.13"
+    version: "1.0.14"
   fake_async:
     dependency: transitive
     description:

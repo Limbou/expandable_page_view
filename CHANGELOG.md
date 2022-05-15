@@ -1,3 +1,8 @@
+## 1.0.14
+
+* Fix warning appearing starting from Flutter 3.0.0
+* Set minimum required Flutter version to 3.0.0
+
 ## 1.0.13
 
 * Make `children` parameter required for default constructor
