@@ -2,7 +2,10 @@
 
 A PageView widget adjusting its height to currently displayed page. It accepts the same parameters as classic PageView.
 
-![Expandable Page View](https://media.giphy.com/media/21kOnh5gH0XcjBdcSx/giphy.gif)
+
+|  Horizontal | Vertical |
+|---|---|
+|<img height="800" src="https://github.com/Limbou/expandable_page_view/blob/feat/vertical-axis-support/assets/appVideo.gif">| <img  height="800" src="https://github.com/Limbou/expandable_page_view/blob/feat/vertical-axis-support/assets/appVideo2.gif">|
 
 ## Getting Started
 
