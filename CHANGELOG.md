@@ -1,3 +1,7 @@
+## 1.0.17
+
+* Fix example videos not being displayed in pub.dev
+
 ## 1.0.16
 
 * Add support for vertical scrollDirection ([#32](https://github.com/Limbou/expandable_page_view/issues/32))
