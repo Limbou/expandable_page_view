@@ -1,3 +1,8 @@
+## 1.0.16
+
+* Add support for vertical scrollDirection ([#32](https://github.com/Limbou/expandable_page_view/issues/32))
+* Update Readme with new example videos
+
 ## 1.0.15
 
 * Fixed range error thrown after decreasing the number of pages in ExpandablePageView to 1 ([#17](https://github.com/Limbou/expandable_page_view/issues/17))

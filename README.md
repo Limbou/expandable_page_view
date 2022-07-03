@@ -5,7 +5,7 @@ A PageView widget adjusting its height to currently displayed page. It accepts t
 
 |  Horizontal | Vertical |
 |---|---|
-|<img height="800" src="https://github.com/Limbou/expandable_page_view/blob/feat/vertical-axis-support/assets/appVideo.gif">| <img  height="800" src="https://github.com/Limbou/expandable_page_view/blob/feat/vertical-axis-support/assets/appVideo2.gif">|
+|<img height="800" src="https://github.com/Limbou/expandable_page_view/blob/main/assets/appVideo.gif">| <img  height="800" src="https://github.com/Limbou/expandable_page_view/blob/main/assets/appVideo2.gif">|
 
 ## Getting Started
 
@@ -14,7 +14,7 @@ In the `pubspec.yaml` of your flutter project, add the following dependency:
 ```yaml
 dependencies:
   ...
-  expandable_page_view: ^1.0.15
+  expandable_page_view: ^1.0.16
 ```
 
 Import it:
