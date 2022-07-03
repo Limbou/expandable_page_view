@@ -26,6 +26,7 @@ dependencies:
 
   expandable_page_view:
     path: ../
+  google_fonts: ^3.0.1
 
 
   # The following adds the Cupertino Icons font to your application.

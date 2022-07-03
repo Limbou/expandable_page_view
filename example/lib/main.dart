@@ -1,4 +1,4 @@
-import 'package:expandable_page_view/expandable_page_view.dart';
+import 'package:example/view/view.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -29,57 +29,48 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  int _currentIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            ExpandablePageView(
-              children: [
-                ExamplePage(Colors.blue, "1", 100),
-                ExamplePage(Colors.green, "2", 200),
-                ExamplePage(Colors.red, "3", 300),
-              ],
-            ),
-            ExpandablePageView.builder(
-              animateFirstPage: true,
-              estimatedPageSize: 100,
-              itemCount: 3,
-              itemBuilder: (context, index) {
-                return ExamplePage(
-                  Colors.blue,
-                  index.toString(),
-                  (index + 1) * 100.0,
-                );
-              },
-            ),
-            const SizedBox(height: 20),
-            Text("UNDER PAGE VIEW WIDGET"),
-          ],
-        ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          BalancePage(),
+          VerticalBalancePage(),
+          BasicExamplesPage(),
+        ],
       ),
-    );
-  }
-}
-
-class ExamplePage extends StatelessWidget {
-  final Color color;
-  final String text;
-  final double height;
-
-  const ExamplePage(this.color, this.text, this.height);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: height,
-      color: color,
-      child: Center(
-        child: Text(text),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.blue,
+        currentIndex: _currentIndex,
+        unselectedItemColor: Color(0xff3a0ca3),
+        selectedItemColor: Colors.white,
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.attach_money_rounded,
+            ),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.currency_exchange_rounded,
+            ),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.info,
+            ),
+            label: '',
+          ),
+        ],
+        onTap: (index) => setState(() => _currentIndex = index),
       ),
     );
   }
