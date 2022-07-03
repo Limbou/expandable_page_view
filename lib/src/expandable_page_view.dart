@@ -264,6 +264,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
           .clamp(0, _heights.length - 1);
     }
 
+    _previousPage = _previousPage.clamp(0, _heights.length - 1);
     _heights[_currentPage] = currentPageHeight;
   }
 
