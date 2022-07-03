@@ -1,3 +1,7 @@
+## 1.0.15
+
+* Fixed range error thrown after decreasing the number of pages in ExpandablePageView to 1 ([#17](https://github.com/Limbou/expandable_page_view/issues/17))
+
 ## 1.0.14
 
 * Fix warning appearing starting from Flutter 3.0.0
