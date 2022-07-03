@@ -5,7 +5,7 @@ A PageView widget adjusting its height to currently displayed page. It accepts t
 
 |  Horizontal | Vertical |
 |---|---|
-|<img height="800" src="https://github.com/Limbou/expandable_page_view/blob/main/assets/appVideo.gif">| <img  height="800" src="https://github.com/Limbou/expandable_page_view/blob/main/assets/appVideo2.gif">|
+|<img height="800" src="https://github.com/Limbou/expandable_page_view/blob/main/assets/appVideo.gif?raw=true">| <img  height="800" src="https://github.com/Limbou/expandable_page_view/blob/main/assets/appVideo2.gif?raw=true">|
 
 ## Getting Started
 
