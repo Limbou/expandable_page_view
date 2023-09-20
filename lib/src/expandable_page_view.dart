@@ -207,7 +207,9 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     _sizes = _prepareSizes();
     _pageController = widget.controller ?? PageController();
     _pageController.addListener(_updatePage);
-    _currentPage = _pageController.initialPage.clamp(0, _sizes.length - 1);
+    final sizesLength = _sizes.length;
+    final sizesUpperBounds = sizesLength == 0 ? 0 : sizesLength - 1;
+    _currentPage = _pageController.initialPage.clamp(0, sizesUpperBounds);
     _previousPage = _currentPage - 1 < 0 ? 0 : _currentPage - 1;
     _shouldDisposePageController = widget.controller == null;
   }
@@ -260,17 +262,18 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   void _reinitializeSizes() {
     final currentPageSize = _sizes[_currentPage];
     _sizes = _prepareSizes();
-
-    if (_currentPage >= _sizes.length) {
+    final sizesLength = _sizes.length;
+    if (_currentPage >= sizesLength) {
       final differenceFromPreviousToCurrent = _previousPage - _currentPage;
-      _currentPage = _sizes.length - 1;
+      _currentPage = sizesLength - 1;
       widget.onPageChanged?.call(_currentPage);
 
       _previousPage = (_currentPage + differenceFromPreviousToCurrent)
-          .clamp(0, _sizes.length - 1);
+          .clamp(0, sizesLength - 1);
     }
 
-    _previousPage = _previousPage.clamp(0, _sizes.length - 1);
+    final sizesUpperBounds = sizesLength == 0 ? 0 : sizesLength - 1;
+    _previousPage = _previousPage.clamp(0, sizesUpperBounds);
     _sizes[_currentPage] = currentPageSize;
   }
 
