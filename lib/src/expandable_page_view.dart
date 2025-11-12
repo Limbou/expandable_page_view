@@ -1,5 +1,7 @@
 library expandable_page_view;
 
+import 'dart:math';
+
 import 'package:expandable_page_view/src/size_reporting_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -207,7 +209,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     _sizes = _prepareSizes();
     _pageController = widget.controller ?? PageController();
     _pageController.addListener(_updatePage);
-    _currentPage = _pageController.initialPage.clamp(0, _sizes.length - 1);
+    _currentPage = _pageController.initialPage.clamp(0, max(0, _sizes.length - 1));
     _previousPage = _currentPage - 1 < 0 ? 0 : _currentPage - 1;
     _shouldDisposePageController = widget.controller == null;
   }
@@ -266,8 +268,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
       _currentPage = _sizes.length - 1;
       widget.onPageChanged?.call(_currentPage);
 
-      _previousPage = (_currentPage + differenceFromPreviousToCurrent)
-          .clamp(0, _sizes.length - 1);
+      _previousPage = (_currentPage + differenceFromPreviousToCurrent).clamp(0, _sizes.length - 1);
     }
 
     _previousPage = _previousPage.clamp(0, _sizes.length - 1);
@@ -355,8 +356,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
           index,
           OverflowPage(
             onSizeChange: (size) => setState(
-              () => _sizes[index] =
-                  _isHorizontalScroll ? size.height : size.width,
+              () => _sizes[index] = _isHorizontalScroll ? size.height : size.width,
             ),
             child: child,
             alignment: widget.alignment,
