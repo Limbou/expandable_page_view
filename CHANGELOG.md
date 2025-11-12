@@ -1,3 +1,8 @@
+## 1.1.0
+
+* Updated minimal supported flutter version to 3.0.0
+* improve initial page clamp to not accept negative values
+
 ## 1.0.17
 
 * Fix example videos not being displayed in pub.dev
