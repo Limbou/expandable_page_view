@@ -13,7 +13,7 @@ class AddContactButton extends StatelessWidget {
         color: Color(0xff3a0ca3),
       ),
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(Colors.white),
+        backgroundColor: WidgetStateProperty.all(Colors.white),
       ),
       label: Text(
         'Add Contact',

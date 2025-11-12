@@ -20,7 +20,7 @@ class SmallInfoTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
+            color: Colors.grey.withValues(alpha: 0.3),
             spreadRadius: 0,
             blurRadius: 7,
             offset: Offset(0, 6),

@@ -10,7 +10,7 @@ class DepositButton extends StatelessWidget {
       onPressed: () {},
       icon: Icon(Icons.arrow_downward_rounded),
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(Color(0xff3a0ca3)),
+        backgroundColor: WidgetStateProperty.all(Color(0xff3a0ca3)),
       ),
       label: Text(
         'Deposit',
