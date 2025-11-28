@@ -1,6 +1,7 @@
 ## 1.1.1
 
 * Fixed page size resetting to `estimatedPageSize` when children list or item count changes, preserving already-measured page sizes to prevent visual glitches
+* Fixed `animateFirstPage` not working - first page now properly animates from `estimatedPageSize` to actual size when `animateFirstPage` is true ([#64](https://github.com/Limbou/expandable_page_view/issues/64))
 
 ## 1.1.0
 

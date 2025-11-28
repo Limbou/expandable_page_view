@@ -520,6 +520,138 @@ void main() {
     });
   });
 
+  group("ExpandablePageView animateFirstPage", () {
+    testWidgets('''given animateFirstPage is true
+    then first page should animate from estimatedPageSize to actual size''',
+        (tester) async {
+      final double estimatedSize = 50;
+      final double actualHeight = 200;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExpandablePageView(
+              animateFirstPage: true,
+              estimatedPageSize: estimatedSize,
+              animationDuration: const Duration(milliseconds: 500),
+              children: [
+                Container(color: Colors.red, height: actualHeight),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Initially, before size is measured, should be at estimated size
+      await tester.pump();
+
+      // During animation, height should be between estimated and actual
+      await tester.pump(const Duration(milliseconds: 100));
+      final midAnimationHeight = tester.pageViewHeight;
+      expect(midAnimationHeight, greaterThan(estimatedSize));
+      expect(midAnimationHeight, lessThan(actualHeight));
+
+      // After animation completes, should be at actual height
+      await tester.pumpAndSettle();
+      expect(tester.pageViewHeight, actualHeight);
+    });
+
+    testWidgets('''given animateFirstPage is false
+    then first page should not animate''', (tester) async {
+      final double estimatedSize = 50;
+      final double actualHeight = 200;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExpandablePageView(
+              animateFirstPage: false,
+              estimatedPageSize: estimatedSize,
+              animationDuration: const Duration(milliseconds: 500),
+              children: [
+                Container(color: Colors.red, height: actualHeight),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // With animateFirstPage: false, after settling the height should be
+      // at the actual height without any visible animation
+      await tester.pumpAndSettle();
+      expect(tester.pageViewHeight, actualHeight);
+    });
+
+    testWidgets('''given animateFirstPage is true with builder
+    then first page should animate from estimatedPageSize to actual size''',
+        (tester) async {
+      final double estimatedSize = 50;
+      final double actualHeight = 200;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExpandablePageView.builder(
+              animateFirstPage: true,
+              estimatedPageSize: estimatedSize,
+              animationDuration: const Duration(milliseconds: 500),
+              itemCount: 1,
+              itemBuilder: (context, index) {
+                return Container(color: Colors.red, height: actualHeight);
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // During animation, height should be between estimated and actual
+      await tester.pump(const Duration(milliseconds: 100));
+      final midAnimationHeight = tester.pageViewHeight;
+      expect(midAnimationHeight, greaterThan(estimatedSize));
+      expect(midAnimationHeight, lessThan(actualHeight));
+
+      // After animation completes, should be at actual height
+      await tester.pumpAndSettle();
+      expect(tester.pageViewHeight, actualHeight);
+    });
+
+    testWidgets(
+        '''given animateFirstPage is true and page is navigated after first load
+    then subsequent animations should still work correctly''', (tester) async {
+      final controller = PageController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExpandablePageView(
+              controller: controller,
+              animateFirstPage: true,
+              estimatedPageSize: 50,
+              animationDuration: const Duration(milliseconds: 100),
+              children: [
+                Container(color: Colors.red, height: 100),
+                Container(color: Colors.blue, height: 200),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.pageViewHeight, 100);
+
+      // Navigate to second page
+      controller.jumpToPage(1);
+      await tester.pumpAndSettle();
+      expect(tester.pageViewHeight, 200);
+
+      // Navigate back
+      controller.jumpToPage(0);
+      await tester.pumpAndSettle();
+      expect(tester.pageViewHeight, 100);
+    });
+  });
+
   group("ExpandablePageView onPageChanged callback", () {
     testWidgets('''given onPageChanged is provided
     when page is swiped

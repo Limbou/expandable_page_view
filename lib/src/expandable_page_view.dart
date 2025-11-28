@@ -194,10 +194,19 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   int _previousPage = 0;
   bool _shouldDisposePageController = false;
   bool _firstPageLoaded = false;
+  double? _initialSize;
 
   double get _currentSize => _sizes[_currentPage];
 
-  double get _previousSize => _sizes[_previousPage];
+  double get _previousSize {
+    // For the first page animation, use the initial estimated size
+    // so we animate from estimatedPageSize to the actual measured size.
+    // Only do this if animateFirstPage is true.
+    if (!_firstPageLoaded && _initialSize != null && widget.animateFirstPage) {
+      return _initialSize!;
+    }
+    return _sizes[_previousPage];
+  }
 
   bool get isBuilder => widget.itemBuilder != null;
 
@@ -212,6 +221,8 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     _currentPage = _pageController.initialPage.clamp(0, max(0, _sizes.length - 1));
     _previousPage = _currentPage - 1 < 0 ? 0 : _currentPage - 1;
     _shouldDisposePageController = widget.controller == null;
+    // Capture the initial estimated size for first page animation
+    _initialSize = widget.estimatedPageSize;
   }
 
   @override
@@ -345,9 +356,13 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   Widget _itemBuilder(BuildContext context, int index) {
     final item = widget.itemBuilder!(context, index);
     return OverflowPage(
-      onSizeChange: (size) => setState(
-        () => _sizes[index] = _isHorizontalScroll ? size.height : size.width,
-      ),
+      onSizeChange: (size) => setState(() {
+        _sizes[index] = _isHorizontalScroll ? size.height : size.width;
+        // Mark first page as loaded after its size is measured
+        if (index == _currentPage && !_firstPageLoaded) {
+          _firstPageLoaded = true;
+        }
+      }),
       child: item,
       alignment: widget.alignment,
       scrollDirection: widget.scrollDirection,
@@ -360,9 +375,13 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
         (index, child) => MapEntry(
           index,
           OverflowPage(
-            onSizeChange: (size) => setState(
-              () => _sizes[index] = _isHorizontalScroll ? size.height : size.width,
-            ),
+            onSizeChange: (size) => setState(() {
+              _sizes[index] = _isHorizontalScroll ? size.height : size.width;
+              // Mark first page as loaded after its size is measured
+              if (index == _currentPage && !_firstPageLoaded) {
+                _firstPageLoaded = true;
+              }
+            }),
             child: child,
             alignment: widget.alignment,
             scrollDirection: widget.scrollDirection,
