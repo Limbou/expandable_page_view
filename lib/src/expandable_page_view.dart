@@ -515,11 +515,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
         ? widget.children![realIndex]
         : widget.itemBuilder!(context, realIndex);
 
-    return _wrapWithSizeReporting(child, realIndex, virtualIndex);
-  }
-
-  Widget _wrapWithSizeReporting(Widget child, int realIndex, int virtualIndex) {
-    return OverflowPage(
+    return _SizeReportingChild(
       onSizeChange: (size) => setState(() {
         _sizes[realIndex] = _isHorizontalScroll ? size.height : size.width;
         if (virtualIndex == _currentPage && !_firstPageLoaded) {
@@ -535,18 +531,28 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   List<Widget> _sizeReportingChildren() {
     return [
       for (int i = 0; i < widget.children!.length; i++)
-        _wrapWithSizeReporting(widget.children![i], i, i),
+        _SizeReportingChild(
+          onSizeChange: (size) => setState(() {
+            _sizes[i] = _isHorizontalScroll ? size.height : size.width;
+            if (i == _currentPage && !_firstPageLoaded) {
+              _firstPageLoaded = true;
+            }
+          }),
+          alignment: widget.alignment,
+          scrollDirection: widget.scrollDirection,
+          child: widget.children![i],
+        ),
     ];
   }
 }
 
-class OverflowPage extends StatelessWidget {
+class _SizeReportingChild extends StatelessWidget {
   final ValueChanged<Size> onSizeChange;
   final Widget child;
   final Alignment alignment;
   final Axis scrollDirection;
 
-  const OverflowPage({
+  const _SizeReportingChild({
     required this.onSizeChange,
     required this.child,
     required this.alignment,
