@@ -236,9 +236,22 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
 
   /// The initial page for the PageController in loop mode.
   /// Starts at a large offset to allow scrolling in both directions.
-  int get _loopInitialPage {
-    final userInitialPage = widget.controller?.initialPage ?? 0;
-    return (_loopMultiplier * _itemCount) + userInitialPage;
+  int _loopInitialPageFor(int realPage) {
+    return (_loopMultiplier * _itemCount) + realPage;
+  }
+
+  /// Creates a PageController for loop mode with the given initial page.
+  PageController _createLoopController(int initialRealPage) {
+    return PageController(
+      initialPage: _loopInitialPageFor(initialRealPage),
+      viewportFraction: widget.controller?.viewportFraction ?? 1.0,
+      keepPage: widget.controller?.keepPage ?? true,
+    );
+  }
+
+  /// Creates a PageController for non-loop mode.
+  PageController _createStandardController(int initialPage) {
+    return widget.controller ?? PageController(initialPage: initialPage);
   }
 
   double get _currentSize {
@@ -304,28 +317,24 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   void initState() {
     super.initState();
     _sizes = _prepareSizes();
+    _initializePageController();
+    _pageController.addListener(_updatePage);
+    _initialSize = widget.estimatedPageSize;
+  }
 
+  void _initializePageController() {
     if (widget.loop) {
-      // In loop mode, we create our own controller starting at a large offset
-      // to allow scrolling in both directions
-      _pageController = PageController(
-        initialPage: _loopInitialPage,
-        viewportFraction: widget.controller?.viewportFraction ?? 1.0,
-        keepPage: widget.controller?.keepPage ?? true,
-      );
+      final userInitialPage = widget.controller?.initialPage ?? 0;
+      _pageController = _createLoopController(userInitialPage);
       _shouldDisposePageController = true;
-      _currentPage = _loopInitialPage;
-      _previousPage = _loopInitialPage;
+      _currentPage = _loopInitialPageFor(userInitialPage);
+      _previousPage = _currentPage;
     } else {
-      _pageController = widget.controller ?? PageController();
+      _pageController = _createStandardController(0);
       _shouldDisposePageController = widget.controller == null;
       _currentPage = _pageController.initialPage.clamp(0, max(0, _sizes.length - 1));
       _previousPage = max(0, _currentPage - 1);
     }
-
-    _pageController.addListener(_updatePage);
-    // Capture the initial estimated size for first page animation
-    _initialSize = widget.estimatedPageSize;
   }
 
   @override
@@ -364,18 +373,12 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     }
 
     if (widget.loop) {
-      // Transitioning from non-loop to loop mode
-      _pageController = PageController(
-        initialPage: (_loopMultiplier * _itemCount) + currentRealPage,
-        viewportFraction: widget.controller?.viewportFraction ?? 1.0,
-        keepPage: widget.controller?.keepPage ?? true,
-      );
+      _pageController = _createLoopController(currentRealPage);
       _shouldDisposePageController = true;
-      _currentPage = (_loopMultiplier * _itemCount) + currentRealPage;
+      _currentPage = _loopInitialPageFor(currentRealPage);
       _previousPage = _currentPage;
     } else {
-      // Transitioning from loop to non-loop mode
-      _pageController = widget.controller ?? PageController(initialPage: currentRealPage);
+      _pageController = _createStandardController(currentRealPage);
       _shouldDisposePageController = widget.controller == null;
       _currentPage = currentRealPage.clamp(0, max(0, _sizes.length - 1));
       _previousPage = _currentPage;
@@ -454,7 +457,6 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
 
   Widget _buildPageView() {
     if (isBuilder || widget.loop) {
-      // Use builder for both explicit builder mode and loop mode
       return PageView.builder(
         controller: _pageController,
         itemBuilder: _itemBuilder,
@@ -474,7 +476,6 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     }
     return PageView(
       controller: _pageController,
-      children: _sizeReportingChildren(),
       onPageChanged: _handlePageChanged,
       reverse: widget.reverse,
       physics: widget.physics,
@@ -486,6 +487,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
       scrollBehavior: widget.scrollBehavior,
       scrollDirection: widget.scrollDirection,
       padEnds: widget.padEnds,
+      children: _sizeReportingChildren(),
     );
   }
 
@@ -506,51 +508,33 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
 
   Widget _itemBuilder(BuildContext context, int virtualIndex) {
     final realIndex = _realIndex(virtualIndex);
+    final child = widget.loop && !isBuilder
+        ? widget.children![realIndex]
+        : widget.itemBuilder!(context, realIndex);
 
-    // In loop mode with children (not builder), get the child from the list
-    // In builder mode, call the user's itemBuilder with the real index
-    final Widget item;
-    if (widget.loop && !isBuilder) {
-      item = widget.children![realIndex];
-    } else {
-      item = widget.itemBuilder!(context, realIndex);
-    }
+    return _wrapWithSizeReporting(child, realIndex, virtualIndex);
+  }
 
+  Widget _wrapWithSizeReporting(Widget child, int realIndex, int virtualIndex) {
     return OverflowPage(
       onSizeChange: (size) => setState(() {
         _sizes[realIndex] = _isHorizontalScroll ? size.height : size.width;
-        // Mark first page as loaded after its size is measured
         if (virtualIndex == _currentPage && !_firstPageLoaded) {
           _firstPageLoaded = true;
         }
       }),
-      child: item,
       alignment: widget.alignment,
       scrollDirection: widget.scrollDirection,
+      child: child,
     );
   }
 
-  List<Widget> _sizeReportingChildren() => widget.children!
-      .asMap()
-      .map(
-        (index, child) => MapEntry(
-          index,
-          OverflowPage(
-            onSizeChange: (size) => setState(() {
-              _sizes[index] = _isHorizontalScroll ? size.height : size.width;
-              // Mark first page as loaded after its size is measured
-              if (index == _currentPage && !_firstPageLoaded) {
-                _firstPageLoaded = true;
-              }
-            }),
-            child: child,
-            alignment: widget.alignment,
-            scrollDirection: widget.scrollDirection,
-          ),
-        ),
-      )
-      .values
-      .toList();
+  List<Widget> _sizeReportingChildren() {
+    return [
+      for (int i = 0; i < widget.children!.length; i++)
+        _wrapWithSizeReporting(widget.children![i], i, i),
+    ];
+  }
 }
 
 class OverflowPage extends StatelessWidget {
