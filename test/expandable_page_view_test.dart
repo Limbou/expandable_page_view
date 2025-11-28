@@ -1159,6 +1159,113 @@ void main() {
       expect(tester.pageViewHeight, 250);
     });
   });
+
+  group("ExpandablePageView with viewportFraction", () {
+    testWidgets('''given viewportFraction < 1.0
+    then height should be maximum of all visible pages''', (tester) async {
+      final controller = PageController(viewportFraction: 0.5);
+
+      await tester.pumpApp(
+        ExpandablePageView(
+          controller: controller,
+          children: [
+            Container(color: Colors.red, height: 100), // Current page (small)
+            Container(color: Colors.blue, height: 300), // Visible adjacent (tall)
+            Container(color: Colors.green, height: 200),
+          ],
+        ),
+      );
+
+      // With viewportFraction 0.5, both page 0 and page 1 are visible
+      // Height should be max(100, 300) = 300
+      expect(tester.pageViewHeight, 300);
+    });
+
+    testWidgets('''given viewportFraction < 1.0 with builder
+    then height should be maximum of all visible pages''', (tester) async {
+      final controller = PageController(viewportFraction: 0.5);
+      final heights = [100.0, 300.0, 200.0];
+
+      await tester.pumpApp(
+        ExpandablePageView.builder(
+          controller: controller,
+          itemCount: 3,
+          itemBuilder: (context, index) => Container(
+            color: colorForIndex(index),
+            height: heights[index],
+          ),
+        ),
+      );
+
+      // With viewportFraction 0.5, both page 0 and page 1 are visible
+      // Height should be max(100, 300) = 300
+      expect(tester.pageViewHeight, 300);
+    });
+
+    testWidgets('''given viewportFraction < 1.0 and page changes
+    then height should update to max of newly visible pages''', (tester) async {
+      final controller = PageController(viewportFraction: 0.5);
+
+      await tester.pumpApp(
+        ExpandablePageView(
+          controller: controller,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 300),
+            Container(color: Colors.green, height: 150),
+            Container(color: Colors.yellow, height: 400),
+          ],
+        ),
+      );
+
+      // Initially pages 0 and 1 visible, max = 300
+      expect(tester.pageViewHeight, 300);
+
+      // Navigate to page 2 - pages 1, 2, 3 should be visible
+      controller.jumpToPage(2);
+      await tester.pumpAndSettle();
+
+      // Visible: page 1 (300), page 2 (150), page 3 (400) - max = 400
+      expect(tester.pageViewHeight, 400);
+    });
+
+    testWidgets('''given viewportFraction = 1.0 (default)
+    then height should only consider current page''', (tester) async {
+      await tester.pumpApp(
+        ExpandablePageView(
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 300),
+          ],
+        ),
+      );
+
+      // Only current page matters, should be 100
+      expect(tester.pageViewHeight, 100);
+    });
+
+    testWidgets('''given viewportFraction with padEnds false
+    then height calculation should still work correctly''', (tester) async {
+      final controller = PageController(viewportFraction: 0.4);
+
+      await tester.pumpApp(
+        ExpandablePageView(
+          controller: controller,
+          padEnds: false,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 250),
+            Container(color: Colors.green, height: 180),
+          ],
+        ),
+      );
+
+      // With viewportFraction 0.4, page 0 and 1 are visible
+      // visibleOnEachSide = ceil((1-0.4)/(2*0.4)) = ceil(0.75) = 1
+      // Heights: page 0 (100), page 1 (250) -> max = 250
+      expect(tester.pageViewHeight, 250);
+    });
+  });
 }
 
 Color colorForIndex(int index) {
