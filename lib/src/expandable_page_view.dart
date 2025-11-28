@@ -354,7 +354,10 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     if (oldWidget.controller != widget.controller && !widget.loop) {
       // Only handle controller changes in non-loop mode
       // In loop mode, we manage our own internal controller
-      oldWidget.controller?.removeListener(_updatePage);
+      _pageController.removeListener(_updatePage);
+      if (_shouldDisposePageController) {
+        _pageController.dispose();
+      }
       _pageController = widget.controller ?? PageController();
       _pageController.addListener(_updatePage);
       _shouldDisposePageController = widget.controller == null;
