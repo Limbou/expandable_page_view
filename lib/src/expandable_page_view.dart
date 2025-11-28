@@ -139,6 +139,12 @@ class ExpandablePageView extends StatefulWidget {
   /// The [onPageChanged] callback will receive the actual page index (0 to itemCount-1),
   /// not the virtual index used internally for infinite scrolling.
   ///
+  /// **Note:** When [loop] is true, [ExpandablePageView] creates its own internal
+  /// [PageController] to manage the virtual page indices. Any [controller] provided
+  /// will only be used to read [PageController.initialPage], [PageController.viewportFraction],
+  /// and [PageController.keepPage]. Methods like [PageController.jumpToPage] or
+  /// [PageController.animateToPage] on the provided controller will not work as expected.
+  ///
   /// Defaults to false.
   final bool loop;
 
@@ -164,6 +170,7 @@ class ExpandablePageView extends StatefulWidget {
     this.loop = false,
     Key? key,
   })  : assert(estimatedPageSize >= 0.0),
+        assert(!loop || children.isNotEmpty, 'children must not be empty when loop is true'),
         children = children,
         itemBuilder = null,
         itemCount = null,
@@ -192,6 +199,7 @@ class ExpandablePageView extends StatefulWidget {
     this.loop = false,
     Key? key,
   })  : assert(estimatedPageSize >= 0.0),
+        assert(!loop || itemCount > 0, 'itemCount must be greater than 0 when loop is true'),
         children = null,
         itemCount = itemCount,
         itemBuilder = itemBuilder,
@@ -221,7 +229,6 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   int _realIndex(int virtualIndex) {
     if (!widget.loop) return virtualIndex;
     final count = _itemCount;
-    if (count == 0) return 0;
     // Handle negative indices properly
     return ((virtualIndex % count) + count) % count;
   }
@@ -240,10 +247,8 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     }
     // When viewportFraction < 1.0, multiple pages are visible
     // Calculate the range of visible pages and return the max size
-    return _maxVisibleSize;
+    return _maxVisibleSizeForPage(_currentPage);
   }
-
-  double get _maxVisibleSize => _maxVisibleSizeForPage(_currentPage);
 
   double get _previousSize {
     // For the first page animation, use the initial estimated size
@@ -302,7 +307,6 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     if (widget.loop) {
       // In loop mode, we create our own controller starting at a large offset
       // to allow scrolling in both directions
-      final userInitialPage = widget.controller?.initialPage ?? 0;
       _pageController = PageController(
         initialPage: _loopInitialPage,
         viewportFraction: widget.controller?.viewportFraction ?? 1.0,
@@ -315,7 +319,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
       _pageController = widget.controller ?? PageController();
       _shouldDisposePageController = widget.controller == null;
       _currentPage = _pageController.initialPage.clamp(0, max(0, _sizes.length - 1));
-      _previousPage = _currentPage - 1 < 0 ? 0 : _currentPage - 1;
+      _previousPage = max(0, _currentPage - 1);
     }
 
     _pageController.addListener(_updatePage);
@@ -326,7 +330,20 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   @override
   void didUpdateWidget(covariant ExpandablePageView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
+
+    // Handle loop property change
+    if (oldWidget.loop != widget.loop) {
+      _handleLoopChange(oldWidget);
+      // Also check if sizes need reinitialization (children count may have changed too)
+      if (_shouldReinitializeHeights(oldWidget)) {
+        _reinitializeSizes();
+      }
+      return;
+    }
+
+    if (oldWidget.controller != widget.controller && !widget.loop) {
+      // Only handle controller changes in non-loop mode
+      // In loop mode, we manage our own internal controller
       oldWidget.controller?.removeListener(_updatePage);
       _pageController = widget.controller ?? PageController();
       _pageController.addListener(_updatePage);
@@ -335,6 +352,35 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     if (_shouldReinitializeHeights(oldWidget)) {
       _reinitializeSizes();
     }
+  }
+
+  /// Handles the transition when loop property changes.
+  void _handleLoopChange(ExpandablePageView oldWidget) {
+    final currentRealPage = _realIndex(_currentPage);
+    _pageController.removeListener(_updatePage);
+    if (_shouldDisposePageController) {
+      _pageController.dispose();
+    }
+
+    if (widget.loop) {
+      // Transitioning from non-loop to loop mode
+      _pageController = PageController(
+        initialPage: (_loopMultiplier * _itemCount) + currentRealPage,
+        viewportFraction: widget.controller?.viewportFraction ?? 1.0,
+        keepPage: widget.controller?.keepPage ?? true,
+      );
+      _shouldDisposePageController = true;
+      _currentPage = (_loopMultiplier * _itemCount) + currentRealPage;
+      _previousPage = _currentPage;
+    } else {
+      // Transitioning from loop to non-loop mode
+      _pageController = widget.controller ?? PageController(initialPage: currentRealPage);
+      _shouldDisposePageController = widget.controller == null;
+      _currentPage = currentRealPage.clamp(0, max(0, _sizes.length - 1));
+      _previousPage = _currentPage;
+    }
+
+    _pageController.addListener(_updatePage);
   }
 
   @override
@@ -443,11 +489,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   }
 
   List<double> _prepareSizes() {
-    if (isBuilder) {
-      return List.filled(widget.itemCount!, widget.estimatedPageSize);
-    } else {
-      return widget.children!.map((child) => widget.estimatedPageSize).toList();
-    }
+    return List.filled(_itemCount, widget.estimatedPageSize);
   }
 
   void _updatePage() {
