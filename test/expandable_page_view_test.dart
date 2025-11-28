@@ -2133,6 +2133,304 @@ void main() {
       expect(lastChangedPage, 1);
     });
   });
+
+  group("ExpandablePageView controller changes", () {
+    testWidgets('''given controller A is provided then changed to controller B
+    then page changes via controller B should work correctly''', (tester) async {
+      int? lastChangedPage;
+      final controllerA = PageController(initialPage: 0);
+      final controllerB = PageController(initialPage: 0);
+
+      await tester.pumpApp(
+        ExpandablePageView(
+          controller: controllerA,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      expect(tester.pageViewHeight, 100);
+
+      // Navigate using controller A
+      controllerA.jumpToPage(1);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 1);
+      expect(tester.pageViewHeight, 200);
+
+      // Switch to controller B
+      await tester.pumpApp(
+        ExpandablePageView(
+          controller: controllerB,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Navigate using controller B
+      controllerB.jumpToPage(2);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 2);
+      expect(tester.pageViewHeight, 300);
+
+      // Swipe should work with controller B
+      final pageView = find.byType(ExpandablePageView);
+      await tester.drag(pageView, previousPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 1);
+      expect(tester.pageViewHeight, 200);
+
+      controllerA.dispose();
+      controllerB.dispose();
+    });
+
+    testWidgets('''given no controller provided then controller B is provided
+    then page changes via controller B should work correctly''', (tester) async {
+      int? lastChangedPage;
+
+      // Start without controller (internal controller created)
+      await tester.pumpApp(
+        ExpandablePageView(
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      expect(tester.pageViewHeight, 100);
+
+      // Navigate via swipe
+      final pageView = find.byType(ExpandablePageView);
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 1);
+      expect(tester.pageViewHeight, 200);
+
+      // Now provide controller B
+      final controllerB = PageController(initialPage: 0);
+      await tester.pumpApp(
+        ExpandablePageView(
+          controller: controllerB,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Navigate using controller B
+      controllerB.jumpToPage(2);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 2);
+      expect(tester.pageViewHeight, 300);
+
+      controllerB.dispose();
+    });
+
+    testWidgets('''given controller A is provided then removed (null)
+    then widget should continue working with internal controller''', (tester) async {
+      int? lastChangedPage;
+      final controllerA = PageController(initialPage: 0);
+
+      // Start with controller A
+      await tester.pumpApp(
+        ExpandablePageView(
+          controller: controllerA,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      // Navigate using controller A
+      controllerA.jumpToPage(1);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 1);
+      expect(tester.pageViewHeight, 200);
+
+      // Remove controller (pass null) - widget creates internal controller
+      // PageView may preserve current scroll position
+      await tester.pumpApp(
+        ExpandablePageView(
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Navigate via swipe - swiping forward should work
+      final pageView = find.byType(ExpandablePageView);
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 2);
+      expect(tester.pageViewHeight, 300);
+
+      // Swipe back should also work
+      await tester.drag(pageView, previousPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 1);
+      expect(tester.pageViewHeight, 200);
+
+      controllerA.dispose();
+    });
+
+    testWidgets('''given controller changes multiple times
+    then only the current controller should affect the widget''', (tester) async {
+      int? lastChangedPage;
+      final controllerA = PageController(initialPage: 0);
+      final controllerB = PageController(initialPage: 0);
+      final controllerC = PageController(initialPage: 0);
+
+      // Start with controller A
+      await tester.pumpApp(
+        ExpandablePageView(
+          controller: controllerA,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      controllerA.jumpToPage(1);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 1);
+
+      // Switch to controller B
+      await tester.pumpApp(
+        ExpandablePageView(
+          controller: controllerB,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      controllerB.jumpToPage(2);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 2);
+
+      // Switch to controller C
+      await tester.pumpApp(
+        ExpandablePageView(
+          controller: controllerC,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      controllerC.jumpToPage(0);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 0);
+      expect(tester.pageViewHeight, 100);
+
+      // Verify current controller C still works
+      controllerC.jumpToPage(2);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 2);
+      expect(tester.pageViewHeight, 300);
+
+      controllerA.dispose();
+      controllerB.dispose();
+      controllerC.dispose();
+    });
+
+    testWidgets('''given no controller then controller then no controller
+    then widget should handle all transitions correctly''', (tester) async {
+      int? lastChangedPage;
+
+      // Start without controller
+      await tester.pumpApp(
+        ExpandablePageView(
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      final pageView = find.byType(ExpandablePageView);
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 1);
+
+      // Add controller
+      final controller = PageController(initialPage: 0);
+      await tester.pumpApp(
+        ExpandablePageView(
+          controller: controller,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      controller.jumpToPage(2);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 2);
+      expect(tester.pageViewHeight, 300);
+
+      // Remove controller again - new internal controller has initialPage 0
+      // but PageView may preserve scroll position from previous state
+      await tester.pumpApp(
+        ExpandablePageView(
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Swipe should work with new internal controller
+      await tester.drag(pageView, previousPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 1);
+      expect(tester.pageViewHeight, 200);
+
+      controller.dispose();
+    });
+  });
 }
 
 Color colorForIndex(int index) {
