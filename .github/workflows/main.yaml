@@ -20,7 +20,7 @@ jobs:
         run: flutter pub get
 
       - name: ✨ Check Formatting
-        run: dart format --set-exit-if-changed lib test
+        run: dart format --line-length 100 --set-exit-if-changed lib test
 
       - name: 🕵️ Analyze
         run: flutter analyze lib test

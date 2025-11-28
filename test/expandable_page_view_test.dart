@@ -12,14 +12,14 @@ const previousPageScrollOffsetVertical = Offset(0, 500);
 const screenSize = Size(800, 600);
 
 void main() {
-  final redContainer = find.byWidgetPredicate(
-      (widget) => widget is Container && widget.color == Colors.red);
-  final blueContainer = find.byWidgetPredicate(
-      (widget) => widget is Container && widget.color == Colors.blue);
-  final greenContainer = find.byWidgetPredicate(
-      (widget) => widget is Container && widget.color == Colors.green);
-  final yellowContainer = find.byWidgetPredicate(
-      (widget) => widget is Container && widget.color == Colors.yellow);
+  final redContainer =
+      find.byWidgetPredicate((widget) => widget is Container && widget.color == Colors.red);
+  final blueContainer =
+      find.byWidgetPredicate((widget) => widget is Container && widget.color == Colors.blue);
+  final greenContainer =
+      find.byWidgetPredicate((widget) => widget is Container && widget.color == Colors.green);
+  final yellowContainer =
+      find.byWidgetPredicate((widget) => widget is Container && widget.color == Colors.yellow);
 
   group("ExpandablePageView", () {
     testWidgets('''given there is only one child
@@ -402,8 +402,7 @@ void main() {
 
   group("ExpandablePageView with initialPage", () {
     testWidgets('''given PageController has initialPage set to 1
-    then PageView should start at second page with matching height''',
-        (tester) async {
+    then PageView should start at second page with matching height''', (tester) async {
       final double secondChildHeight = 300;
       final controller = PageController(initialPage: 1);
       await tester.pumpApp(
@@ -422,8 +421,7 @@ void main() {
     });
 
     testWidgets('''given PageController has initialPage set to last page
-    then PageView should start at last page with matching height''',
-        (tester) async {
+    then PageView should start at last page with matching height''', (tester) async {
       final double lastChildHeight = 400;
       final controller = PageController(initialPage: 2);
       await tester.pumpApp(
@@ -440,8 +438,7 @@ void main() {
       expect(greenContainer, findsOneWidget);
     });
 
-    testWidgets(
-        '''given PageController has initialPage greater than children count
+    testWidgets('''given PageController has initialPage greater than children count
     then PageView should clamp to last valid page''', (tester) async {
       final double lastChildHeight = 300;
       final controller = PageController(initialPage: 10);
@@ -459,8 +456,7 @@ void main() {
     });
 
     testWidgets('''given PageController.builder has initialPage set to 1
-    then PageView should start at second page with matching height''',
-        (tester) async {
+    then PageView should start at second page with matching height''', (tester) async {
       final double baseHeight = 100;
       final controller = PageController(initialPage: 1);
       await tester.pumpApp(
@@ -482,8 +478,7 @@ void main() {
 
   group("ExpandablePageView with estimatedPageSize", () {
     testWidgets('''given estimatedPageSize is set
-    then initial sizes should use estimatedPageSize before measurement''',
-        (tester) async {
+    then initial sizes should use estimatedPageSize before measurement''', (tester) async {
       final double estimatedSize = 150;
       final double actualHeight = 200;
       // We can verify this indirectly - the widget should still work correctly
@@ -522,8 +517,7 @@ void main() {
 
   group("ExpandablePageView animateFirstPage", () {
     testWidgets('''given animateFirstPage is true
-    then first page should animate from estimatedPageSize to actual size''',
-        (tester) async {
+    then first page should animate from estimatedPageSize to actual size''', (tester) async {
       final double estimatedSize = 50;
       final double actualHeight = 200;
 
@@ -583,8 +577,7 @@ void main() {
     });
 
     testWidgets('''given animateFirstPage is true with builder
-    then first page should animate from estimatedPageSize to actual size''',
-        (tester) async {
+    then first page should animate from estimatedPageSize to actual size''', (tester) async {
       final double estimatedSize = 50;
       final double actualHeight = 200;
 
@@ -617,8 +610,7 @@ void main() {
       expect(tester.pageViewHeight, actualHeight);
     });
 
-    testWidgets(
-        '''given animateFirstPage is true and page is navigated after first load
+    testWidgets('''given animateFirstPage is true and page is navigated after first load
     then subsequent animations should still work correctly''', (tester) async {
       final controller = PageController();
       await tester.pumpWidget(
@@ -809,8 +801,7 @@ void main() {
 
   group("ExpandablePageView programmatic navigation", () {
     testWidgets('''given PageController.jumpToPage is called
-    then PageView should jump to that page with correct height''',
-        (tester) async {
+    then PageView should jump to that page with correct height''', (tester) async {
       final controller = PageController();
       await tester.pumpApp(
         ExpandablePageView(
@@ -832,8 +823,7 @@ void main() {
     });
 
     testWidgets('''given PageController.animateToPage is called
-    then PageView should animate to that page with correct height''',
-        (tester) async {
+    then PageView should animate to that page with correct height''', (tester) async {
       final controller = PageController();
       await tester.pumpApp(
         ExpandablePageView(
@@ -908,8 +898,7 @@ void main() {
   });
 
   group("ExpandablePageView size preservation after reinitialize", () {
-    testWidgets(
-        '''given pages have been measured
+    testWidgets('''given pages have been measured
     when children list length changes
     then existing page sizes should be preserved''', (tester) async {
       // Start with 2 pages, scroll to measure page 2
@@ -952,8 +941,7 @@ void main() {
       expect(tester.pageViewHeight, 200);
     });
 
-    testWidgets(
-        '''given builder pages have been measured
+    testWidgets('''given builder pages have been measured
     when itemCount increases
     then existing page sizes should be preserved''', (tester) async {
       final double baseHeight = 100;
@@ -1023,8 +1011,7 @@ void main() {
   });
 
   group("ExpandablePageView controller lifecycle", () {
-    testWidgets(
-        '''given external PageController is provided
+    testWidgets('''given external PageController is provided
     when widget is disposed
     then controller should not be disposed''', (tester) async {
       final controller = PageController();
@@ -1047,8 +1034,7 @@ void main() {
       expect(() => controller.initialPage, returnsNormally);
     });
 
-    testWidgets(
-        '''given no PageController is provided
+    testWidgets('''given no PageController is provided
     when widget creates internal controller
     then internal controller should be disposed with widget''', (tester) async {
       await tester.pumpApp(
@@ -1068,10 +1054,8 @@ void main() {
       expect(find.byType(Container), findsOneWidget);
     });
 
-    testWidgets(
-        '''given PageController is switched from external to null
-    then widget should create and manage internal controller''',
-        (tester) async {
+    testWidgets('''given PageController is switched from external to null
+    then widget should create and manage internal controller''', (tester) async {
       final externalController = PageController();
       await tester.pumpApp(
         ExpandablePageView(
