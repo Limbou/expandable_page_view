@@ -196,7 +196,17 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   bool _firstPageLoaded = false;
   double? _initialSize;
 
-  double get _currentSize => _sizes[_currentPage];
+  double get _currentSize {
+    final viewportFraction = _pageController.viewportFraction;
+    if (viewportFraction >= 1.0) {
+      return _sizes[_currentPage];
+    }
+    // When viewportFraction < 1.0, multiple pages are visible
+    // Calculate the range of visible pages and return the max size
+    return _maxVisibleSize;
+  }
+
+  double get _maxVisibleSize => _maxVisibleSizeForPage(_currentPage);
 
   double get _previousSize {
     // For the first page animation, use the initial estimated size
@@ -205,7 +215,35 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     if (!_firstPageLoaded && _initialSize != null && widget.animateFirstPage) {
       return _initialSize!;
     }
-    return _sizes[_previousPage];
+    final viewportFraction = _pageController.viewportFraction;
+    if (viewportFraction >= 1.0) {
+      return _sizes[_previousPage];
+    }
+    // With viewportFraction < 1.0, use max of visible pages for previous state too
+    return _maxVisibleSizeForPage(_previousPage);
+  }
+
+  /// Returns the maximum size among all visible pages when viewportFraction < 1.0.
+  /// Calculates how many pages are visible on each side based on the viewportFraction:
+  /// - viewportFraction 0.5: 1 page visible on each side
+  /// - viewportFraction 0.33: 2 pages visible on each side
+  /// - viewportFraction 0.25: 2 pages visible on each side
+  double _maxVisibleSizeForPage(int page) {
+    if (_sizes.isEmpty) return 0;
+
+    final viewportFraction = _pageController.viewportFraction;
+    final visibleOnEachSide = ((1 - viewportFraction) / (2 * viewportFraction)).ceil();
+
+    final startPage = (page - visibleOnEachSide).clamp(0, _sizes.length - 1);
+    final endPage = (page + visibleOnEachSide).clamp(0, _sizes.length - 1);
+
+    double maxSize = 0;
+    for (int i = startPage; i <= endPage; i++) {
+      if (_sizes[i] > maxSize) {
+        maxSize = _sizes[i];
+      }
+    }
+    return maxSize;
   }
 
   bool get isBuilder => widget.itemBuilder != null;
