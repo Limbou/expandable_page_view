@@ -1,4 +1,4 @@
-## [Unreleased]
+## 1.2.0
 
 * Added `loop` parameter to enable infinite looping through pages ([#50](https://github.com/Limbou/expandable_page_view/issues/50))
 
