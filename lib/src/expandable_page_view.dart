@@ -142,8 +142,9 @@ class ExpandablePageView extends StatefulWidget {
   /// **Note:** When [loop] is true, [ExpandablePageView] creates its own internal
   /// [PageController] to manage the virtual page indices. Any [controller] provided
   /// will only be used to read [PageController.initialPage], [PageController.viewportFraction],
-  /// and [PageController.keepPage]. Methods like [PageController.jumpToPage] or
-  /// [PageController.animateToPage] on the provided controller will not work as expected.
+  /// and [PageController.keepPage]. The provided controller is not attached to the PageView,
+  /// so calling methods like [PageController.jumpToPage] or [PageController.animateToPage]
+  /// will have no effect on the displayed pages.
   ///
   /// Defaults to false.
   final bool loop;
