@@ -1,3 +1,7 @@
+## 1.1.1
+
+* Fixed page size resetting to `estimatedPageSize` when children list or item count changes, preserving already-measured page sizes to prevent visual glitches
+
 ## 1.1.0
 
 * Updated minimal supported flutter version to 3.0.0

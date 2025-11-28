@@ -261,7 +261,12 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
 
   void _reinitializeSizes() {
     final currentPageSize = _sizes[_currentPage];
-    _sizes = _prepareSizes();
+
+    final estimatedSizes = _prepareSizes();
+    for (int i = 0; i < estimatedSizes.length; i++) {
+      estimatedSizes[i] = _sizes.elementAtOrNull(i) ?? estimatedSizes[i];
+    }
+    _sizes = estimatedSizes;
 
     if (_currentPage >= _sizes.length) {
       final differenceFromPreviousToCurrent = _previousPage - _currentPage;
