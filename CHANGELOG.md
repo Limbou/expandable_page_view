@@ -1,3 +1,7 @@
+## [Unreleased]
+
+* Added `loop` parameter to enable infinite looping through pages ([#50](https://github.com/Limbou/expandable_page_view/issues/50))
+
 ## 1.1.1
 
 * Fixed size calculation with `viewportFraction` - when `viewportFraction < 1.0`, height now correctly uses the maximum of all visible pages instead of only the current page ([#52](https://github.com/Limbou/expandable_page_view/issues/52))

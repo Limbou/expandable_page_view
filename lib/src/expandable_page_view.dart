@@ -130,6 +130,18 @@ class ExpandablePageView extends StatefulWidget {
   /// This property defaults to true and must not be null.
   final bool padEnds;
 
+  /// Whether the page view should loop infinitely.
+  ///
+  /// When set to true, the page view will cycle through pages infinitely
+  /// in both directions. Swiping past the last page will show the first page,
+  /// and swiping before the first page will show the last page.
+  ///
+  /// The [onPageChanged] callback will receive the actual page index (0 to itemCount-1),
+  /// not the virtual index used internally for infinite scrolling.
+  ///
+  /// Defaults to false.
+  final bool loop;
+
   ExpandablePageView({
     required List<Widget> children,
     this.controller,
@@ -149,6 +161,7 @@ class ExpandablePageView extends StatefulWidget {
     this.scrollBehavior,
     this.scrollDirection = Axis.horizontal,
     this.padEnds = true,
+    this.loop = false,
     Key? key,
   })  : assert(estimatedPageSize >= 0.0),
         children = children,
@@ -176,6 +189,7 @@ class ExpandablePageView extends StatefulWidget {
     this.scrollBehavior,
     this.scrollDirection = Axis.horizontal,
     this.padEnds = true,
+    this.loop = false,
     Key? key,
   })  : assert(estimatedPageSize >= 0.0),
         children = null,
@@ -196,10 +210,33 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   bool _firstPageLoaded = false;
   double? _initialSize;
 
+  /// Large multiplier for initial page offset in loop mode.
+  /// This allows scrolling in both directions from the start.
+  static const int _loopMultiplier = 10000;
+
+  /// The actual number of items (not virtual).
+  int get _itemCount => widget.itemCount ?? widget.children!.length;
+
+  /// Converts a virtual index (used in infinite scroll) to a real index (0 to _itemCount-1).
+  int _realIndex(int virtualIndex) {
+    if (!widget.loop) return virtualIndex;
+    final count = _itemCount;
+    if (count == 0) return 0;
+    // Handle negative indices properly
+    return ((virtualIndex % count) + count) % count;
+  }
+
+  /// The initial page for the PageController in loop mode.
+  /// Starts at a large offset to allow scrolling in both directions.
+  int get _loopInitialPage {
+    final userInitialPage = widget.controller?.initialPage ?? 0;
+    return (_loopMultiplier * _itemCount) + userInitialPage;
+  }
+
   double get _currentSize {
     final viewportFraction = _pageController.viewportFraction;
     if (viewportFraction >= 1.0) {
-      return _sizes[_currentPage];
+      return _sizes[_realIndex(_currentPage)];
     }
     // When viewportFraction < 1.0, multiple pages are visible
     // Calculate the range of visible pages and return the max size
@@ -217,7 +254,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     }
     final viewportFraction = _pageController.viewportFraction;
     if (viewportFraction >= 1.0) {
-      return _sizes[_previousPage];
+      return _sizes[_realIndex(_previousPage)];
     }
     // With viewportFraction < 1.0, use max of visible pages for previous state too
     return _maxVisibleSizeForPage(_previousPage);
@@ -228,19 +265,26 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   /// - viewportFraction 0.5: 1 page visible on each side
   /// - viewportFraction 0.33: 2 pages visible on each side
   /// - viewportFraction 0.25: 2 pages visible on each side
-  double _maxVisibleSizeForPage(int page) {
+  double _maxVisibleSizeForPage(int virtualPage) {
     if (_sizes.isEmpty) return 0;
 
     final viewportFraction = _pageController.viewportFraction;
     final visibleOnEachSide = ((1 - viewportFraction) / (2 * viewportFraction)).ceil();
 
-    final startPage = (page - visibleOnEachSide).clamp(0, _sizes.length - 1);
-    final endPage = (page + visibleOnEachSide).clamp(0, _sizes.length - 1);
-
     double maxSize = 0;
-    for (int i = startPage; i <= endPage; i++) {
-      if (_sizes[i] > maxSize) {
-        maxSize = _sizes[i];
+    for (int i = -visibleOnEachSide; i <= visibleOnEachSide; i++) {
+      final adjacentVirtualPage = virtualPage + i;
+
+      // In non-loop mode, skip pages outside valid range
+      if (!widget.loop) {
+        if (adjacentVirtualPage < 0 || adjacentVirtualPage >= _sizes.length) {
+          continue;
+        }
+      }
+
+      final realIdx = _realIndex(adjacentVirtualPage);
+      if (_sizes[realIdx] > maxSize) {
+        maxSize = _sizes[realIdx];
       }
     }
     return maxSize;
@@ -254,11 +298,27 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   void initState() {
     super.initState();
     _sizes = _prepareSizes();
-    _pageController = widget.controller ?? PageController();
+
+    if (widget.loop) {
+      // In loop mode, we create our own controller starting at a large offset
+      // to allow scrolling in both directions
+      final userInitialPage = widget.controller?.initialPage ?? 0;
+      _pageController = PageController(
+        initialPage: _loopInitialPage,
+        viewportFraction: widget.controller?.viewportFraction ?? 1.0,
+        keepPage: widget.controller?.keepPage ?? true,
+      );
+      _shouldDisposePageController = true;
+      _currentPage = _loopInitialPage;
+      _previousPage = _loopInitialPage;
+    } else {
+      _pageController = widget.controller ?? PageController();
+      _shouldDisposePageController = widget.controller == null;
+      _currentPage = _pageController.initialPage.clamp(0, max(0, _sizes.length - 1));
+      _previousPage = _currentPage - 1 < 0 ? 0 : _currentPage - 1;
+    }
+
     _pageController.addListener(_updatePage);
-    _currentPage = _pageController.initialPage.clamp(0, max(0, _sizes.length - 1));
-    _previousPage = _currentPage - 1 < 0 ? 0 : _currentPage - 1;
-    _shouldDisposePageController = widget.controller == null;
     // Capture the initial estimated size for first page animation
     _initialSize = widget.estimatedPageSize;
   }
@@ -309,7 +369,8 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   }
 
   void _reinitializeSizes() {
-    final currentPageSize = _sizes[_currentPage];
+    final realCurrentPage = _realIndex(_currentPage);
+    final currentPageSize = _sizes[realCurrentPage];
 
     final estimatedSizes = _prepareSizes();
     for (int i = 0; i < estimatedSizes.length; i++) {
@@ -317,7 +378,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     }
     _sizes = estimatedSizes;
 
-    if (_currentPage >= _sizes.length) {
+    if (!widget.loop && realCurrentPage >= _sizes.length) {
       final differenceFromPreviousToCurrent = _previousPage - _currentPage;
       _currentPage = _sizes.length - 1;
       widget.onPageChanged?.call(_currentPage);
@@ -325,8 +386,10 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
       _previousPage = (_currentPage + differenceFromPreviousToCurrent).clamp(0, _sizes.length - 1);
     }
 
-    _previousPage = _previousPage.clamp(0, _sizes.length - 1);
-    _sizes[_currentPage] = currentPageSize;
+    if (!widget.loop) {
+      _previousPage = _previousPage.clamp(0, _sizes.length - 1);
+    }
+    _sizes[_realIndex(_currentPage)] = currentPageSize;
   }
 
   Duration _getDuration() {
@@ -336,13 +399,20 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     return widget.animateFirstPage ? widget.animationDuration : Duration.zero;
   }
 
+  /// Handles onPageChanged callback, converting virtual index to real index in loop mode.
+  void _handlePageChanged(int virtualIndex) {
+    final realIndex = _realIndex(virtualIndex);
+    widget.onPageChanged?.call(realIndex);
+  }
+
   Widget _buildPageView() {
-    if (isBuilder) {
+    if (isBuilder || widget.loop) {
+      // Use builder for both explicit builder mode and loop mode
       return PageView.builder(
         controller: _pageController,
         itemBuilder: _itemBuilder,
-        itemCount: widget.itemCount,
-        onPageChanged: widget.onPageChanged,
+        itemCount: widget.loop ? null : widget.itemCount,
+        onPageChanged: _handlePageChanged,
         reverse: widget.reverse,
         physics: widget.physics,
         pageSnapping: widget.pageSnapping,
@@ -358,7 +428,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     return PageView(
       controller: _pageController,
       children: _sizeReportingChildren(),
-      onPageChanged: widget.onPageChanged,
+      onPageChanged: _handlePageChanged,
       reverse: widget.reverse,
       physics: widget.physics,
       pageSnapping: widget.pageSnapping,
@@ -391,13 +461,23 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     }
   }
 
-  Widget _itemBuilder(BuildContext context, int index) {
-    final item = widget.itemBuilder!(context, index);
+  Widget _itemBuilder(BuildContext context, int virtualIndex) {
+    final realIndex = _realIndex(virtualIndex);
+
+    // In loop mode with children (not builder), get the child from the list
+    // In builder mode, call the user's itemBuilder with the real index
+    final Widget item;
+    if (widget.loop && !isBuilder) {
+      item = widget.children![realIndex];
+    } else {
+      item = widget.itemBuilder!(context, realIndex);
+    }
+
     return OverflowPage(
       onSizeChange: (size) => setState(() {
-        _sizes[index] = _isHorizontalScroll ? size.height : size.width;
+        _sizes[realIndex] = _isHorizontalScroll ? size.height : size.width;
         // Mark first page as loaded after its size is measured
-        if (index == _currentPage && !_firstPageLoaded) {
+        if (virtualIndex == _currentPage && !_firstPageLoaded) {
           _firstPageLoaded = true;
         }
       }),
