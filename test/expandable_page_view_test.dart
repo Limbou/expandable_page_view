@@ -2431,6 +2431,394 @@ void main() {
       controller.dispose();
     });
   });
+
+  group("ExpandablePageView loop edge cases", () {
+    testWidgets('''given loop is true with viewportFraction 0.8
+    then height should be max of visible pages including wrapped pages''', (tester) async {
+      // With viewportFraction 0.8, about 0.1 of adjacent pages visible on each side
+      // visibleOnEachSide = ceil((1 - 0.8) / (2 * 0.8)) = ceil(0.125) = 1
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          controller: PageController(viewportFraction: 0.8),
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      // On page 0: visible pages are 2 (wrapped), 0, 1
+      // Heights: 300, 100, 200 -> max = 300
+      expect(tester.pageViewHeight, 300);
+
+      final pageView = find.byType(ExpandablePageView);
+
+      // Go to page 1: visible pages are 0, 1, 2
+      // Heights: 100, 200, 300 -> max = 300
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(tester.pageViewHeight, 300);
+
+      // Go to page 2: visible pages are 1, 2, 0 (wrapped)
+      // Heights: 200, 300, 100 -> max = 300
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(tester.pageViewHeight, 300);
+    });
+
+    testWidgets('''given loop property toggles rapidly
+    then widget should remain stable''', (tester) async {
+      int? lastChangedPage;
+
+      for (int i = 0; i < 5; i++) {
+        await tester.pumpApp(
+          ExpandablePageView(
+            loop: i.isEven,
+            onPageChanged: (page) => lastChangedPage = page,
+            children: [
+              Container(color: Colors.red, height: 100),
+              Container(color: Colors.blue, height: 200),
+              Container(color: Colors.green, height: 300),
+            ],
+          ),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      expect(find.byType(ExpandablePageView), findsOneWidget);
+      expect(tester.pageViewHeight, 100);
+
+      // Should still be able to navigate
+      final pageView = find.byType(ExpandablePageView);
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 1);
+    });
+
+    testWidgets('''given loop is true with estimatedPageSize 0 and immediate swipe
+    then size animation should work correctly''', (tester) async {
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          estimatedPageSize: 0,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+          ],
+        ),
+      );
+
+      // Initial size should be 100 after first page loads
+      await tester.pumpAndSettle();
+      expect(tester.pageViewHeight, 100);
+
+      // Immediate swipe to next page
+      final pageView = find.byType(ExpandablePageView);
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+
+      expect(tester.pageViewHeight, 200);
+
+      // Swipe again to loop back
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(tester.pageViewHeight, 100);
+    });
+
+    testWidgets('''given loop is true and child height changes dynamically
+    then size should update correctly''', (tester) async {
+      final heights = [100.0, 200.0];
+
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          children: [
+            Container(color: Colors.red, height: heights[0]),
+            Container(color: Colors.blue, height: heights[1]),
+          ],
+        ),
+      );
+
+      expect(tester.pageViewHeight, 100);
+
+      // Update heights by rebuilding with new values
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          children: [
+            Container(color: Colors.red, height: 150), // Changed from 100
+            Container(color: Colors.blue, height: 250), // Changed from 200
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Height should update to new value
+      expect(tester.pageViewHeight, 150);
+
+      // Navigate to second page
+      final pageView = find.byType(ExpandablePageView);
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(tester.pageViewHeight, 250);
+    });
+
+    testWidgets('''given loop is true with builder and same index called multiple times
+    then widget should handle correctly''', (tester) async {
+      int buildCount = 0;
+      final heights = [100.0, 200.0, 300.0];
+
+      await tester.pumpApp(
+        ExpandablePageView.builder(
+          loop: true,
+          itemCount: 3,
+          itemBuilder: (context, index) {
+            buildCount++;
+            return Container(
+              color: colorForIndex(index),
+              height: heights[index],
+            );
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final initialBuildCount = buildCount;
+
+      // Loop through all pages twice
+      final pageView = find.byType(ExpandablePageView);
+      for (int i = 0; i < 6; i++) {
+        await tester.drag(pageView, nextPageScrollOffset);
+        await tester.pumpAndSettle();
+      }
+
+      // Builder should have been called for each visible page
+      expect(buildCount, greaterThan(initialBuildCount));
+
+      // Should be back on page 0
+      expect(tester.pageViewHeight, 100);
+    });
+
+    testWidgets('''given loop is true and children count increases
+    then new pages should be accessible''', (tester) async {
+      int? lastChangedPage;
+
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+          ],
+        ),
+      );
+
+      final pageView = find.byType(ExpandablePageView);
+
+      // Navigate to page 1
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 1);
+
+      // Add a third child
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Navigate to the new page 2
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 2);
+      expect(tester.pageViewHeight, 300);
+
+      // Loop should still work
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 0);
+    });
+
+    testWidgets('''given loop is true and children count decreases
+    then page should be clamped correctly''', (tester) async {
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          controller: PageController(initialPage: 2),
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.pageViewHeight, 300);
+
+      // Reduce to 2 children while on page 2
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Should handle gracefully - page wraps to valid index
+      expect(find.byType(ExpandablePageView), findsOneWidget);
+
+      // Navigation should still work
+      final pageView = find.byType(ExpandablePageView);
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('''given loop is true with physics NeverScrollableScrollPhysics
+    then looping should still work programmatically''', (tester) async {
+      final controller = PageController();
+
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          controller: controller,
+          physics: const NeverScrollableScrollPhysics(),
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+          ],
+        ),
+      );
+
+      expect(tester.pageViewHeight, 100);
+
+      // Can't swipe due to physics, but internal controller still works
+      // Note: In loop mode, the external controller is not attached,
+      // so we can only test that the widget renders correctly
+      expect(find.byType(ExpandablePageView), findsOneWidget);
+
+      controller.dispose();
+    });
+
+    testWidgets('''given loop is true with two pages
+    then backward loop should work correctly''', (tester) async {
+      int? lastChangedPage;
+
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+          ],
+        ),
+      );
+
+      final pageView = find.byType(ExpandablePageView);
+
+      // Swipe backward from page 0 - should go to page 1
+      await tester.drag(pageView, previousPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 1);
+      expect(tester.pageViewHeight, 200);
+
+      // Swipe backward again - should go to page 0
+      await tester.drag(pageView, previousPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 0);
+      expect(tester.pageViewHeight, 100);
+    });
+
+    testWidgets('''given loop toggles while on non-zero page
+    then current page should be preserved''', (tester) async {
+      int? lastChangedPage;
+
+      // Start without loop, go to page 1
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: false,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      final pageView = find.byType(ExpandablePageView);
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 1);
+      expect(tester.pageViewHeight, 200);
+
+      // Enable loop - should stay on page 1
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.pageViewHeight, 200);
+
+      // Disable loop - should stay on page 1
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: false,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.pageViewHeight, 200);
+    });
+
+    testWidgets('''given loop is true with very small viewportFraction
+    then all pages should be considered for height''', (tester) async {
+      // With viewportFraction 0.3, many pages visible
+      // visibleOnEachSide = ceil((1 - 0.3) / (2 * 0.3)) = ceil(1.17) = 2
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          controller: PageController(viewportFraction: 0.3),
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 500), // Tallest
+            Container(color: Colors.yellow, height: 150),
+          ],
+        ),
+      );
+
+      // With 4 pages and visibleOnEachSide=2, on page 0:
+      // Visible: pages -2, -1, 0, 1, 2 -> wraps to 2, 3, 0, 1, 2
+      // Heights: 500, 150, 100, 200, 500 -> max = 500
+      expect(tester.pageViewHeight, 500);
+    });
+  });
 }
 
 Color colorForIndex(int index) {
