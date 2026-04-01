@@ -2178,6 +2178,95 @@ then jumpToPage navigates to the correct real page''', (tester) async {
       expect(lastChangedPage, 2);
       expect(tester.pageViewHeight, 300);
     });
+
+    testWidgets('''given ExpandablePageController is provided
+and loop changes from true to false
+then widget creates internal standard controller at current page''',
+        (tester) async {
+      final controller = ExpandablePageController(itemCount: 3);
+      int? lastChangedPage;
+
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          controller: controller,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      controller.jumpToPage(2);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 2);
+      expect(tester.pageViewHeight, 300);
+
+      // Toggle loop off — widget should create an internal standard controller
+      // at the current real page (2), NOT use the ExpandablePageController
+      // (whose initialPage is a virtual index)
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: false,
+          controller: controller,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      // Should remain on page 2 after loop toggle
+      expect(tester.pageViewHeight, 300);
+    });
+
+    testWidgets('''given ExpandablePageController is provided
+and loop changes from false to true
+then widget re-uses the ExpandablePageController''', (tester) async {
+      final controller = ExpandablePageController(itemCount: 3);
+      int? lastChangedPage;
+
+      // Start with loop off — widget creates internal standard controller
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: false,
+          controller: controller,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      // Toggle loop on — widget should use the ExpandablePageController
+      // Page resets to controller's initialPage (0)
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          controller: controller,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      expect(tester.pageViewHeight, 100); // page 0 (controller's initialPage)
+
+      // Programmatic navigation should work
+      controller.jumpToPage(1);
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 1);
+      expect(tester.pageViewHeight, 200);
+    });
   });
 
   group("ExpandablePageView controller changes", () {

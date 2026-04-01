@@ -404,13 +404,55 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     }
 
     if (widget.loop) {
-      _pageController = _createLoopController(currentRealPage);
-      _shouldDisposePageController = true;
-      _currentPage = _loopInitialPageFor(currentRealPage);
-      _previousPage = _currentPage;
+      final expandableController = widget.controller is ExpandablePageController
+          ? widget.controller as ExpandablePageController
+          : null;
+
+      if (expandableController != null) {
+        // Compute actual real page using old loop state, since _realIndex
+        // uses widget.loop which already reflects the new value.
+        final actualRealPage = oldWidget.loop
+            ? (((_currentPage % _itemCount) + _itemCount) % _itemCount)
+            : _currentPage;
+        final oldSize =
+            _sizes[actualRealPage.clamp(0, max(0, _sizes.length - 1))];
+
+        // Re-use the user's ExpandablePageController.
+        // Page resets to controller's initialPage — acceptable for a loop toggle.
+        expandableController.itemCount = _itemCount;
+        _pageController = expandableController;
+        _shouldDisposePageController = false;
+        _currentPage = _pageController.initialPage;
+        _previousPage = _currentPage;
+
+        // Preserve old page size for the new page if it hasn't been measured,
+        // preventing the widget from collapsing to zero height.
+        final newRealPage = _realIndex(_currentPage);
+        if (_sizes[newRealPage] == 0.0 ||
+            _sizes[newRealPage] == widget.estimatedPageSize) {
+          _sizes[newRealPage] = oldSize;
+        }
+
+        // The PageView reuses scroll positions, so initialPage alone doesn't
+        // move to the correct page. Jump after the controller is attached.
+        final targetRealPage = newRealPage;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _pageController.hasClients) {
+            _pageController.jumpToPage(targetRealPage);
+          }
+        });
+      } else {
+        _pageController = _createLoopController(currentRealPage);
+        _shouldDisposePageController = true;
+        _currentPage = _loopInitialPageFor(currentRealPage);
+        _previousPage = _currentPage;
+      }
     } else {
-      _pageController = _createStandardController(currentRealPage);
-      _shouldDisposePageController = widget.controller == null;
+      // When toggling to non-loop mode, always create an internal standard
+      // controller. Don't use ExpandablePageController here because its
+      // initialPage is a virtual index that doesn't work in non-loop mode.
+      _pageController = PageController(initialPage: currentRealPage);
+      _shouldDisposePageController = true;
       _currentPage = currentRealPage.clamp(0, max(0, _sizes.length - 1));
       _previousPage = _currentPage;
     }
