@@ -2267,6 +2267,123 @@ then widget re-uses the ExpandablePageController''', (tester) async {
       expect(lastChangedPage, 1);
       expect(tester.pageViewHeight, 200);
     });
+
+    testWidgets('''given loop is true and ExpandablePageController is provided
+then animateToPage navigates to the correct real page''', (tester) async {
+      final controller = ExpandablePageController(itemCount: 3);
+      int? lastChangedPage;
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          controller: controller,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      expect(tester.pageViewHeight, 100); // page 0
+
+      controller.animateToPage(
+        2,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.ease,
+      );
+      await tester.pumpAndSettle();
+
+      expect(lastChangedPage, 2);
+      expect(tester.pageViewHeight, 300);
+    });
+
+    testWidgets('''given loop is true and ExpandablePageController is provided
+and current page is 0
+then animateToPage to last page takes shortest path (backward)''',
+        (tester) async {
+      final controller = ExpandablePageController(itemCount: 5);
+      int? lastChangedPage;
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          controller: controller,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+            Container(color: Colors.yellow, height: 400),
+            Container(color: Colors.orange, height: 500),
+          ],
+        ),
+      );
+
+      // On page 0, animating to page 4 should go backward (1 step)
+      // not forward (4 steps)
+      controller.animateToPage(
+        4,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.ease,
+      );
+      await tester.pumpAndSettle();
+
+      expect(lastChangedPage, 4);
+      expect(tester.pageViewHeight, 500);
+    });
+
+    testWidgets('''given loop is true and ExpandablePageController is provided
+then page getter returns real page index''', (tester) async {
+      final controller = ExpandablePageController(itemCount: 3, initialPage: 1);
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          controller: controller,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      // page should report real page, not virtual
+      expect(controller.page, closeTo(1.0, 0.01));
+      expect(controller.realPage, 1);
+
+      controller.jumpToPage(2);
+      await tester.pumpAndSettle();
+
+      expect(controller.page, closeTo(2.0, 0.01));
+      expect(controller.realPage, 2);
+    });
+
+    testWidgets('''given loop is true and ExpandablePageController is provided
+and on last page
+then jumpToPage(0) wraps correctly''', (tester) async {
+      final controller = ExpandablePageController(itemCount: 3, initialPage: 2);
+      int? lastChangedPage;
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          controller: controller,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      expect(tester.pageViewHeight, 300); // page 2
+
+      controller.jumpToPage(0);
+      await tester.pumpAndSettle();
+
+      expect(lastChangedPage, 0);
+      expect(tester.pageViewHeight, 100);
+    });
   });
 
   group("ExpandablePageView controller changes", () {
