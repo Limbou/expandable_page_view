@@ -140,12 +140,27 @@ class ExpandablePageView extends StatefulWidget {
   /// The [onPageChanged] callback will receive the actual page index (0 to itemCount-1),
   /// not the virtual index used internally for infinite scrolling.
   ///
-  /// **Note:** When [loop] is true, [ExpandablePageView] creates its own internal
-  /// [PageController] to manage the virtual page indices. Any [controller] provided
-  /// will only be used to read [PageController.initialPage], [PageController.viewportFraction],
-  /// and [PageController.keepPage]. The provided controller is not attached to the PageView,
-  /// so calling methods like [PageController.jumpToPage] or [PageController.animateToPage]
-  /// will have no effect on the displayed pages.
+  /// To programmatically control the page view in loop mode, use
+  /// [ExpandablePageController]:
+  ///
+  /// ```dart
+  /// final controller = ExpandablePageController(itemCount: 5);
+  ///
+  /// ExpandablePageView(
+  ///   controller: controller,
+  ///   loop: true,
+  ///   children: [...],
+  /// );
+  ///
+  /// // Navigate programmatically
+  /// controller.jumpToPage(3);
+  /// controller.animateToPage(0, duration: Duration(milliseconds: 300), curve: Curves.ease);
+  /// ```
+  ///
+  /// If a regular [PageController] is provided instead, it will only be used
+  /// to read [PageController.initialPage], [PageController.viewportFraction],
+  /// and [PageController.keepPage]. The regular controller will not be attached
+  /// to the PageView.
   ///
   /// Defaults to false.
   final bool loop;
