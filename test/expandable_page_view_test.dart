@@ -2152,6 +2152,32 @@ void main() {
       await tester.pumpAndSettle();
       expect(lastChangedPage, 1);
     });
+
+    testWidgets('''given loop is true and ExpandablePageController is provided
+then jumpToPage navigates to the correct real page''', (tester) async {
+      final controller = ExpandablePageController(itemCount: 3);
+      int? lastChangedPage;
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          controller: controller,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      expect(tester.pageViewHeight, 100); // Starts at page 0
+
+      controller.jumpToPage(2);
+      await tester.pumpAndSettle();
+
+      expect(lastChangedPage, 2);
+      expect(tester.pageViewHeight, 300);
+    });
   });
 
   group("ExpandablePageView controller changes", () {

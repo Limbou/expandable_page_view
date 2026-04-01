@@ -2,6 +2,7 @@ library expandable_page_view;
 
 import 'dart:math';
 
+import 'package:expandable_page_view/src/expandable_page_controller.dart';
 import 'package:expandable_page_view/src/size_reporting_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -327,11 +328,25 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
 
   void _initializePageController() {
     if (widget.loop) {
-      final userInitialPage = widget.controller?.initialPage ?? 0;
-      _pageController = _createLoopController(userInitialPage);
-      _shouldDisposePageController = true;
-      _currentPage = _loopInitialPageFor(userInitialPage);
-      _previousPage = _currentPage;
+      final expandableController = widget.controller is ExpandablePageController
+          ? widget.controller as ExpandablePageController
+          : null;
+
+      if (expandableController != null) {
+        // User provided an ExpandablePageController — use it directly
+        expandableController.itemCount = _itemCount;
+        _pageController = expandableController;
+        _shouldDisposePageController = false;
+        _currentPage = _pageController.initialPage;
+        _previousPage = _currentPage;
+      } else {
+        // No controller or regular PageController — create internal one
+        final userInitialPage = widget.controller?.initialPage ?? 0;
+        _pageController = _createLoopController(userInitialPage);
+        _shouldDisposePageController = true;
+        _currentPage = _loopInitialPageFor(userInitialPage);
+        _previousPage = _currentPage;
+      }
     } else {
       _pageController = _createStandardController(0);
       _shouldDisposePageController = widget.controller == null;
