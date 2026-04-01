@@ -2384,6 +2384,99 @@ then jumpToPage(0) wraps correctly''', (tester) async {
       expect(lastChangedPage, 0);
       expect(tester.pageViewHeight, 100);
     });
+
+    testWidgets('''given loop is true and ExpandablePageController is provided
+with builder constructor
+then jumpToPage works correctly''', (tester) async {
+      final controller = ExpandablePageController(itemCount: 3);
+      final heights = [100.0, 200.0, 300.0];
+      final colors = [Colors.red, Colors.blue, Colors.green];
+      int? lastChangedPage;
+
+      await tester.pumpApp(
+        ExpandablePageView.builder(
+          loop: true,
+          controller: controller,
+          itemCount: 3,
+          onPageChanged: (page) => lastChangedPage = page,
+          itemBuilder: (context, index) => Container(
+            color: colors[index],
+            height: heights[index],
+          ),
+        ),
+      );
+
+      expect(tester.pageViewHeight, 100); // page 0
+
+      controller.jumpToPage(2);
+      await tester.pumpAndSettle();
+
+      expect(lastChangedPage, 2);
+      expect(tester.pageViewHeight, 300);
+    });
+
+    testWidgets('''given loop is true and ExpandablePageController
+with viewportFraction < 1.0
+then jumpToPage works correctly''', (tester) async {
+      final controller = ExpandablePageController(
+        itemCount: 3,
+        viewportFraction: 0.8,
+      );
+      int? lastChangedPage;
+
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          controller: controller,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      controller.jumpToPage(1);
+      await tester.pumpAndSettle();
+
+      expect(lastChangedPage, 1);
+    });
+
+    testWidgets('''given loop is true and ExpandablePageController is provided
+then manual swiping still works and loops''', (tester) async {
+      final controller = ExpandablePageController(itemCount: 3);
+      int? lastChangedPage;
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          controller: controller,
+          onPageChanged: (page) => lastChangedPage = page,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      final pageView = find.byType(ExpandablePageView);
+
+      // Swipe forward through all pages and loop
+      await tester.drag(pageView, const Offset(-500, 0));
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 1);
+
+      await tester.drag(pageView, const Offset(-500, 0));
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 2);
+
+      await tester.drag(pageView, const Offset(-500, 0));
+      await tester.pumpAndSettle();
+      expect(lastChangedPage, 0); // Looped!
+
+      expect(controller.realPage, 0);
+    });
   });
 
   group("ExpandablePageView controller changes", () {
