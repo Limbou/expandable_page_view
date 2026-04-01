@@ -91,6 +91,7 @@ class ExpandablePageController extends PageController {
   /// Jumps to the given real page index using the shortest path.
   @override
   void jumpToPage(int page) {
+    assert(page >= 0 && page < _itemCount, 'page must be in range [0, $_itemCount)');
     super.jumpToPage(_closestVirtualPage(page));
   }
 
@@ -101,6 +102,7 @@ class ExpandablePageController extends PageController {
     required Duration duration,
     required Curve curve,
   }) {
+    assert(page >= 0 && page < _itemCount, 'page must be in range [0, $_itemCount)');
     return super.animateToPage(
       _closestVirtualPage(page),
       duration: duration,
@@ -111,8 +113,7 @@ class ExpandablePageController extends PageController {
   /// Finds the closest virtual page for the given real page index,
   /// choosing the shortest path (fewest pages to scroll).
   int _closestVirtualPage(int targetRealPage) {
-    final currentVirtual =
-        hasClients ? super.page?.round() ?? initialPage : initialPage;
+    final currentVirtual = hasClients ? super.page?.round() ?? initialPage : initialPage;
     final currentReal = _toRealIndex(currentVirtual);
 
     // Forward and backward deltas
@@ -120,8 +121,7 @@ class ExpandablePageController extends PageController {
     int backwardDelta = forwardDelta - _itemCount;
 
     // Choose shortest path
-    final delta =
-        forwardDelta.abs() <= backwardDelta.abs() ? forwardDelta : backwardDelta;
+    final delta = forwardDelta.abs() <= backwardDelta.abs() ? forwardDelta : backwardDelta;
 
     return currentVirtual + delta;
   }

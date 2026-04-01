@@ -187,8 +187,7 @@ class ExpandablePageView extends StatefulWidget {
     this.loop = false,
     Key? key,
   })  : assert(estimatedPageSize >= 0.0),
-        assert(!loop || children.isNotEmpty,
-            'children must not be empty when loop is true'),
+        assert(!loop || children.isNotEmpty, 'children must not be empty when loop is true'),
         assert(
           loop || controller is! ExpandablePageController,
           'ExpandablePageController should only be used with loop: true',
@@ -221,8 +220,7 @@ class ExpandablePageView extends StatefulWidget {
     this.loop = false,
     Key? key,
   })  : assert(estimatedPageSize >= 0.0),
-        assert(!loop || itemCount > 0,
-            'itemCount must be greater than 0 when loop is true'),
+        assert(!loop || itemCount > 0, 'itemCount must be greater than 0 when loop is true'),
         assert(
           loop || controller is! ExpandablePageController,
           'ExpandablePageController should only be used with loop: true',
@@ -310,8 +308,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     if (_sizes.isEmpty) return 0;
 
     final viewportFraction = _pageController.viewportFraction;
-    final visibleOnEachSide =
-        ((1 - viewportFraction) / (2 * viewportFraction)).round();
+    final visibleOnEachSide = ((1 - viewportFraction) / (2 * viewportFraction)).round();
 
     double maxSize = 0;
     for (int i = -visibleOnEachSide; i <= visibleOnEachSide; i++) {
@@ -369,8 +366,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     } else {
       _pageController = _createStandardController(0);
       _shouldDisposePageController = widget.controller == null;
-      _currentPage =
-          _pageController.initialPage.clamp(0, max(0, _sizes.length - 1));
+      _currentPage = _pageController.initialPage.clamp(0, max(0, _sizes.length - 1));
       _previousPage = max(0, _currentPage - 1);
     }
   }
@@ -433,8 +429,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
         final actualRealPage = oldWidget.loop
             ? (((_currentPage % _itemCount) + _itemCount) % _itemCount)
             : _currentPage;
-        final oldSize =
-            _sizes[actualRealPage.clamp(0, max(0, _sizes.length - 1))];
+        final oldSize = _sizes[actualRealPage.clamp(0, max(0, _sizes.length - 1))];
 
         // Re-use the user's ExpandablePageController.
         // Page resets to controller's initialPage — acceptable for a loop toggle.
@@ -447,8 +442,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
         // Preserve old page size for the new page if it hasn't been measured,
         // preventing the widget from collapsing to zero height.
         final newRealPage = _realIndex(_currentPage);
-        if (_sizes[newRealPage] == 0.0 ||
-            _sizes[newRealPage] == widget.estimatedPageSize) {
+        if (_sizes[newRealPage] == 0.0 || _sizes[newRealPage] == widget.estimatedPageSize) {
           _sizes[newRealPage] = oldSize;
         }
 
@@ -580,8 +574,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
       _currentPage = _sizes.length - 1;
       widget.onPageChanged?.call(_currentPage);
 
-      _previousPage = (_currentPage + differenceFromPreviousToCurrent)
-          .clamp(0, _sizes.length - 1);
+      _previousPage = (_currentPage + differenceFromPreviousToCurrent).clamp(0, _sizes.length - 1);
     }
 
     if (!widget.loop) {
