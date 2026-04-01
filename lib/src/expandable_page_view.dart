@@ -189,6 +189,10 @@ class ExpandablePageView extends StatefulWidget {
   })  : assert(estimatedPageSize >= 0.0),
         assert(!loop || children.isNotEmpty,
             'children must not be empty when loop is true'),
+        assert(
+          loop || controller is! ExpandablePageController,
+          'ExpandablePageController should only be used with loop: true',
+        ),
         children = children,
         itemBuilder = null,
         itemCount = null,
@@ -219,6 +223,10 @@ class ExpandablePageView extends StatefulWidget {
   })  : assert(estimatedPageSize >= 0.0),
         assert(!loop || itemCount > 0,
             'itemCount must be greater than 0 when loop is true'),
+        assert(
+          loop || controller is! ExpandablePageController,
+          'ExpandablePageController should only be used with loop: true',
+        ),
         children = null,
         itemCount = itemCount,
         itemBuilder = itemBuilder,
@@ -237,10 +245,6 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   bool _firstPageLoaded = false;
   double? _initialSize;
 
-  /// Large multiplier for initial page offset in loop mode.
-  /// This allows scrolling in both directions from the start.
-  static const int _loopMultiplier = 10000;
-
   /// The actual number of items (not virtual).
   int get _itemCount => widget.itemCount ?? widget.children!.length;
 
@@ -255,7 +259,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   /// The initial page for the PageController in loop mode.
   /// Starts at a large offset to allow scrolling in both directions.
   int _loopInitialPageFor(int realPage) {
-    return (_loopMultiplier * _itemCount) + realPage;
+    return (ExpandablePageController.loopMultiplier * _itemCount) + realPage;
   }
 
   /// Creates a PageController for loop mode with the given initial page.

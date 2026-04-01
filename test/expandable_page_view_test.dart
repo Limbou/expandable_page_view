@@ -2206,11 +2206,11 @@ then widget creates internal standard controller at current page''',
 
       // Toggle loop off — widget should create an internal standard controller
       // at the current real page (2), NOT use the ExpandablePageController
-      // (whose initialPage is a virtual index)
+      // (whose initialPage is a virtual index).
+      // ExpandablePageController must not be passed with loop: false.
       await tester.pumpApp(
         ExpandablePageView(
           loop: false,
-          controller: controller,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
             Container(color: Colors.red, height: 100),
@@ -2224,17 +2224,16 @@ then widget creates internal standard controller at current page''',
       expect(tester.pageViewHeight, 300);
     });
 
-    testWidgets('''given ExpandablePageController is provided
-and loop changes from false to true
+    testWidgets('''given no controller is provided
+and loop changes from false to true with ExpandablePageController
 then widget re-uses the ExpandablePageController''', (tester) async {
       final controller = ExpandablePageController(itemCount: 3);
       int? lastChangedPage;
 
-      // Start with loop off — widget creates internal standard controller
+      // Start with loop off — no ExpandablePageController allowed
       await tester.pumpApp(
         ExpandablePageView(
           loop: false,
-          controller: controller,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
             Container(color: Colors.red, height: 100),
@@ -2476,6 +2475,20 @@ then manual swiping still works and loops''', (tester) async {
       expect(lastChangedPage, 0); // Looped!
 
       expect(controller.realPage, 0);
+    });
+
+    testWidgets('''given ExpandablePageController is provided with loop false
+    then assertion error is thrown''', (tester) async {
+      expect(
+        () => ExpandablePageView(
+          loop: false,
+          controller: ExpandablePageController(itemCount: 3),
+          children: [
+            Container(height: 100),
+          ],
+        ),
+        throwsAssertionError,
+      );
     });
   });
 
