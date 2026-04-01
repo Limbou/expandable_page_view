@@ -1,4 +1,4 @@
-## Unreleased
+## 1.3.0
 
 * Added `ExpandablePageController` for programmatic page control in loop mode — supports `jumpToPage`, `animateToPage`, and `page` getter with real page indices
 * `ExpandablePageController` uses shortest-path navigation when animating between pages in loop mode
