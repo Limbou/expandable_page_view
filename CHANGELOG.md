@@ -1,3 +1,8 @@
+## Unreleased
+
+* Added `ExpandablePageController` for programmatic page control in loop mode — supports `jumpToPage`, `animateToPage`, and `page` getter with real page indices
+* `ExpandablePageController` uses shortest-path navigation when animating between pages in loop mode
+
 ## 1.2.1
 
 * Fixed height calculation with near-1.0 `viewportFraction` values — adjacent pages now only affect height when at least 50% visible, preventing unnecessary vertical space when using small fractions for spacing/padding
