@@ -45,12 +45,20 @@ class ExpandablePageController extends PageController {
     int initialPage = 0,
     super.viewportFraction,
     super.keepPage,
-  })  : _itemCount = itemCount,
+  })  : assert(itemCount > 0, 'itemCount must be greater than 0'),
+        assert(
+          initialPage >= 0 && initialPage < itemCount,
+          'initialPage must be >= 0 and < itemCount',
+        ),
+        _itemCount = itemCount,
         super(initialPage: loopMultiplier * itemCount + initialPage);
 
   /// The number of real pages.
   int get itemCount => _itemCount;
-  set itemCount(int value) => _itemCount = value;
+  set itemCount(int value) {
+    assert(value > 0, 'itemCount must be greater than 0');
+    _itemCount = value;
+  }
 
   /// Converts a virtual index to a real index (0 to [itemCount]-1).
   int _toRealIndex(int virtualIndex) {
@@ -68,7 +76,7 @@ class ExpandablePageController extends PageController {
   double? get page {
     final virtualPage = super.page;
     if (virtualPage == null) return null;
-    return virtualPage % _itemCount;
+    return ((virtualPage % _itemCount) + _itemCount) % _itemCount;
   }
 
   /// The current real page index (rounded).
