@@ -2863,6 +2863,78 @@ then jumpToPage navigates to the correct real page''', (tester) async {
       // Heights: 150, 100, 200 -> max = 200
       expect(tester.pageViewHeight, 200);
     });
+
+    testWidgets('''given loop is true and ExpandablePageController changes
+then widget uses the new controller''', (tester) async {
+      final controller1 = ExpandablePageController(itemCount: 3);
+      final controller2 =
+          ExpandablePageController(itemCount: 3, initialPage: 2);
+
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          controller: controller1,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      expect(tester.pageViewHeight, 100); // page 0
+
+      // Swap to controller2 which starts at page 2
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          controller: controller2,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      expect(tester.pageViewHeight, 300); // page 2
+    });
+
+    testWidgets('''given loop is true with ExpandablePageController
+and children count changes
+then controller itemCount is updated''', (tester) async {
+      final controller = ExpandablePageController(itemCount: 3);
+
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          controller: controller,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+          ],
+        ),
+      );
+
+      expect(controller.itemCount, 3);
+
+      // Add a child
+      await tester.pumpApp(
+        ExpandablePageView(
+          loop: true,
+          controller: controller,
+          children: [
+            Container(color: Colors.red, height: 100),
+            Container(color: Colors.blue, height: 200),
+            Container(color: Colors.green, height: 300),
+            Container(color: Colors.yellow, height: 400),
+          ],
+        ),
+      );
+
+      expect(controller.itemCount, 4);
+    });
   });
 }
 

@@ -363,24 +363,33 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     // Handle loop property change
     if (oldWidget.loop != widget.loop) {
       _handleLoopChange(oldWidget);
-      // Also check if sizes need reinitialization (children count may have changed too)
       if (_shouldReinitializeHeights(oldWidget)) {
         _reinitializeSizes();
       }
       return;
     }
 
-    if (oldWidget.controller != widget.controller && !widget.loop) {
-      // Only handle controller changes in non-loop mode
-      // In loop mode, we manage our own internal controller
-      _pageController.removeListener(_updatePage);
-      if (_shouldDisposePageController) {
-        _pageController.dispose();
+    if (oldWidget.controller != widget.controller) {
+      if (widget.loop &&
+          (widget.controller is ExpandablePageController ||
+              oldWidget.controller is ExpandablePageController)) {
+        _handleLoopControllerChange();
+      } else if (!widget.loop) {
+        _pageController.removeListener(_updatePage);
+        if (_shouldDisposePageController) {
+          _pageController.dispose();
+        }
+        _pageController = widget.controller ?? PageController();
+        _pageController.addListener(_updatePage);
+        _shouldDisposePageController = widget.controller == null;
       }
-      _pageController = widget.controller ?? PageController();
-      _pageController.addListener(_updatePage);
-      _shouldDisposePageController = widget.controller == null;
     }
+
+    // Update itemCount on ExpandablePageController when children change
+    if (widget.loop && _pageController is ExpandablePageController) {
+      (_pageController as ExpandablePageController).itemCount = _itemCount;
+    }
+
     if (_shouldReinitializeHeights(oldWidget)) {
       _reinitializeSizes();
     }
@@ -407,6 +416,61 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
     }
 
     _pageController.addListener(_updatePage);
+  }
+
+  /// Handles controller change while in loop mode.
+  void _handleLoopControllerChange() {
+    _pageController.removeListener(_updatePage);
+    if (_shouldDisposePageController) {
+      _pageController.dispose();
+    }
+
+    final oldSize = _sizes[_realIndex(_currentPage)];
+    _previousPage = _currentPage;
+
+    final expandableController = widget.controller is ExpandablePageController
+        ? widget.controller as ExpandablePageController
+        : null;
+
+    if (expandableController != null) {
+      expandableController.itemCount = _itemCount;
+      _pageController = expandableController;
+      _shouldDisposePageController = false;
+      _currentPage = _pageController.initialPage;
+    } else {
+      final userInitialPage = widget.controller?.initialPage ?? 0;
+      _pageController = _createLoopController(userInitialPage);
+      _shouldDisposePageController = true;
+      _currentPage = _loopInitialPageFor(userInitialPage);
+    }
+
+    // Use the old page's measured size as a placeholder for the new page
+    // if it hasn't been measured yet, preventing the widget from collapsing
+    // to zero height before the new page can report its actual size.
+    final newRealPage = _realIndex(_currentPage);
+    if (_sizes[newRealPage] == 0.0 || _sizes[newRealPage] == widget.estimatedPageSize) {
+      _sizes[newRealPage] = oldSize;
+    }
+
+    _pageController.addListener(_updatePage);
+
+    // The PageView reuses scroll positions, so initialPage alone doesn't
+    // move to the correct page. Jump after the controller is attached.
+    if (expandableController != null) {
+      final targetRealPage = _realIndex(_currentPage);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _pageController.hasClients) {
+          _pageController.jumpToPage(targetRealPage);
+        }
+      });
+    } else {
+      final targetVirtualPage = _currentPage;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _pageController.hasClients) {
+          _pageController.jumpToPage(targetVirtualPage);
+        }
+      });
+    }
   }
 
   @override
