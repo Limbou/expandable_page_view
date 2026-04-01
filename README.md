@@ -52,4 +52,47 @@ ExpandablePageView.builder(
 ),
 ```
 
+### Loop Mode
+
+To create an infinitely scrolling page view, set `loop: true`:
+
+```dart
+ExpandablePageView(
+  loop: true,
+  children: [
+    ExamplePage(Colors.blue, "1", 100),
+    ExamplePage(Colors.green, "2", 200),
+    ExamplePage(Colors.red, "3", 300),
+  ],
+),
+```
+
+### Programmatic Control in Loop Mode
+
+To programmatically navigate pages in loop mode (e.g., for auto-play carousels or custom indicators), use `ExpandablePageController`:
+
+```dart
+final controller = ExpandablePageController(itemCount: 3);
+
+ExpandablePageView(
+  controller: controller,
+  loop: true,
+  children: [
+    ExamplePage(Colors.blue, "1", 100),
+    ExamplePage(Colors.green, "2", 200),
+    ExamplePage(Colors.red, "3", 300),
+  ],
+),
+
+// Navigate programmatically
+controller.jumpToPage(2);
+controller.animateToPage(0, duration: Duration(milliseconds: 300), curve: Curves.ease);
+
+// Read current page
+print(controller.page);     // e.g., 1.5 (fractional during scroll)
+print(controller.realPage); // e.g., 1 (rounded)
+```
+
+> **Note:** `ExpandablePageController` uses shortest-path navigation — animating from page 0 to the last page will scroll backward (1 step) rather than forward through all pages.
+
 Check out [example project](https://github.com/Limbou/expandable_page_view/tree/main/example) to play with ExpandablePageView.
