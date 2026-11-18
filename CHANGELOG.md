@@ -1,4 +1,4 @@
-## Unreleased
+## 1.3.1
 
 * Fixed `RangeError` and wrong page shown when `itemCount` or `children` changes with `loop: true` ([#72](https://github.com/Limbou/expandable_page_view/issues/72))
 * `onPageChanged` for a page removed by an `itemCount` or `children` change is now called after the frame, so the callback can call `setState`
