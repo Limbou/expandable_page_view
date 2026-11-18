@@ -1,5 +1,5 @@
 import 'package:expandable_page_view/expandable_page_view.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/page_view_height.dart';
@@ -10,16 +10,21 @@ const previousPageScrollOffset = Offset(500, 0);
 const nextPageScrollOffsetVertical = Offset(0, -500);
 const previousPageScrollOffsetVertical = Offset(0, 500);
 const screenSize = Size(800, 600);
+const red = Color(0xFFF44336);
+const blue = Color(0xFF2196F3);
+const green = Color(0xFF4CAF50);
+const yellow = Color(0xFFFFEB3B);
+const orange = Color(0xFFFF9800);
 
 void main() {
   final redContainer =
-      find.byWidgetPredicate((widget) => widget is Container && widget.color == Colors.red);
+      find.byWidgetPredicate((widget) => widget is Container && widget.color == red);
   final blueContainer =
-      find.byWidgetPredicate((widget) => widget is Container && widget.color == Colors.blue);
+      find.byWidgetPredicate((widget) => widget is Container && widget.color == blue);
   final greenContainer =
-      find.byWidgetPredicate((widget) => widget is Container && widget.color == Colors.green);
+      find.byWidgetPredicate((widget) => widget is Container && widget.color == green);
   final yellowContainer =
-      find.byWidgetPredicate((widget) => widget is Container && widget.color == Colors.yellow);
+      find.byWidgetPredicate((widget) => widget is Container && widget.color == yellow);
 
   group("ExpandablePageView", () {
     testWidgets('''given there is only one child
@@ -29,7 +34,7 @@ void main() {
       await tester.pumpApp(
         ExpandablePageView(
           children: [
-            Container(color: Colors.red, height: firstChildHeight),
+            Container(color: red, height: firstChildHeight),
           ],
         ),
       );
@@ -43,9 +48,9 @@ void main() {
       await tester.pumpApp(
         ExpandablePageView(
           children: [
-            Container(color: Colors.red, height: firstChildHeight),
-            Container(color: Colors.blue, height: 300),
-            Container(color: Colors.green, height: 400),
+            Container(color: red, height: firstChildHeight),
+            Container(color: blue, height: 300),
+            Container(color: green, height: 400),
           ],
         ),
       );
@@ -64,9 +69,9 @@ void main() {
       await tester.pumpApp(
         ExpandablePageView(
           children: [
-            Container(color: Colors.red, height: 200),
-            Container(color: Colors.blue, height: secondChildHeight),
-            Container(color: Colors.green, height: 400),
+            Container(color: red, height: 200),
+            Container(color: blue, height: secondChildHeight),
+            Container(color: green, height: 400),
           ],
         ),
       );
@@ -89,9 +94,9 @@ void main() {
       await tester.pumpApp(
         ExpandablePageView(
           children: [
-            Container(color: Colors.red, height: firstChildHeight),
-            Container(color: Colors.blue, height: 300),
-            Container(color: Colors.green, height: 400),
+            Container(color: red, height: firstChildHeight),
+            Container(color: blue, height: 300),
+            Container(color: green, height: 400),
           ],
         ),
       );
@@ -116,7 +121,7 @@ void main() {
         ExpandablePageView.builder(
           itemCount: 1,
           itemBuilder: (context, index) {
-            return Container(color: Colors.blue, height: firstChildHeight);
+            return Container(color: blue, height: firstChildHeight);
           },
         ),
       );
@@ -206,9 +211,9 @@ void main() {
       await tester.pumpApp(
         ExpandablePageView(
           children: [
-            Container(color: Colors.red, height: firstChildHeight),
-            Container(color: Colors.blue, height: 300),
-            Container(color: Colors.green, height: 400),
+            Container(color: red, height: firstChildHeight),
+            Container(color: blue, height: 300),
+            Container(color: green, height: 400),
           ],
         ),
       );
@@ -217,9 +222,9 @@ void main() {
       await tester.pumpApp(
         ExpandablePageView(
           children: [
-            Container(color: Colors.red, height: newFirstChildHeight),
-            Container(color: Colors.blue, height: 300),
-            Container(color: Colors.green, height: 400),
+            Container(color: red, height: newFirstChildHeight),
+            Container(color: blue, height: 300),
+            Container(color: green, height: 400),
           ],
         ),
       );
@@ -233,9 +238,9 @@ void main() {
       await tester.pumpApp(
         ExpandablePageView(
           children: [
-            Container(color: Colors.red, height: firstChildHeight),
-            Container(color: Colors.blue, height: 300),
-            Container(color: Colors.green, height: 400),
+            Container(color: red, height: firstChildHeight),
+            Container(color: blue, height: 300),
+            Container(color: green, height: 400),
           ],
         ),
       );
@@ -244,8 +249,8 @@ void main() {
       await tester.pumpApp(
         ExpandablePageView(
           children: [
-            Container(color: Colors.red, height: newFirstChildHeight),
-            Container(color: Colors.green, height: 400),
+            Container(color: red, height: newFirstChildHeight),
+            Container(color: green, height: 400),
           ],
         ),
       );
@@ -292,9 +297,9 @@ void main() {
       await tester.pumpApp(
         ExpandablePageView(
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 300),
-            Container(color: Colors.green, height: lastPageHeight),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 300),
+            Container(color: green, height: lastPageHeight),
           ],
         ),
       );
@@ -308,8 +313,8 @@ void main() {
       await tester.pumpApp(
         ExpandablePageView(
           children: [
-            Container(color: Colors.red, height: 200),
-            Container(color: Colors.green, height: newLastPageHeight),
+            Container(color: red, height: 200),
+            Container(color: green, height: newLastPageHeight),
           ],
         ),
       );
@@ -323,9 +328,9 @@ void main() {
         ExpandablePageView(
           controller: oldPageController,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 300),
-            Container(color: Colors.green, height: 400),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 300),
+            Container(color: green, height: 400),
           ],
         ),
       );
@@ -335,9 +340,9 @@ void main() {
         ExpandablePageView(
           controller: newPageController,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 300),
-            Container(color: Colors.green, height: 400),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 300),
+            Container(color: green, height: 400),
           ],
         ),
       );
@@ -354,8 +359,8 @@ void main() {
         ExpandablePageView(
           scrollDirection: Axis.vertical,
           children: [
-            Container(color: Colors.red, width: firstChildWidth),
-            Container(color: Colors.blue, width: 300),
+            Container(color: red, width: firstChildWidth),
+            Container(color: blue, width: 300),
           ],
         ),
       );
@@ -370,8 +375,8 @@ void main() {
         ExpandablePageView(
           scrollDirection: Axis.vertical,
           children: [
-            Container(color: Colors.red, width: 200),
-            Container(color: Colors.blue, width: secondChildWidth),
+            Container(color: red, width: 200),
+            Container(color: blue, width: secondChildWidth),
           ],
         ),
       );
@@ -409,9 +414,9 @@ void main() {
         ExpandablePageView(
           controller: controller,
           children: [
-            Container(color: Colors.red, height: 200),
-            Container(color: Colors.blue, height: secondChildHeight),
-            Container(color: Colors.green, height: 400),
+            Container(color: red, height: 200),
+            Container(color: blue, height: secondChildHeight),
+            Container(color: green, height: 400),
           ],
         ),
       );
@@ -428,9 +433,9 @@ void main() {
         ExpandablePageView(
           controller: controller,
           children: [
-            Container(color: Colors.red, height: 200),
-            Container(color: Colors.blue, height: 300),
-            Container(color: Colors.green, height: lastChildHeight),
+            Container(color: red, height: 200),
+            Container(color: blue, height: 300),
+            Container(color: green, height: lastChildHeight),
           ],
         ),
       );
@@ -446,8 +451,8 @@ void main() {
         ExpandablePageView(
           controller: controller,
           children: [
-            Container(color: Colors.red, height: 200),
-            Container(color: Colors.blue, height: lastChildHeight),
+            Container(color: red, height: 200),
+            Container(color: blue, height: lastChildHeight),
           ],
         ),
       );
@@ -486,8 +491,8 @@ void main() {
         ExpandablePageView(
           estimatedPageSize: estimatedSize,
           children: [
-            Container(color: Colors.red, height: actualHeight),
-            Container(color: Colors.blue, height: 300),
+            Container(color: red, height: actualHeight),
+            Container(color: blue, height: 300),
           ],
         ),
       );
@@ -521,18 +526,14 @@ void main() {
       final double estimatedSize = 50;
       final double actualHeight = 200;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ExpandablePageView(
-              animateFirstPage: true,
-              estimatedPageSize: estimatedSize,
-              animationDuration: const Duration(milliseconds: 500),
-              children: [
-                Container(color: Colors.red, height: actualHeight),
-              ],
-            ),
-          ),
+      await tester.pumpAppFrame(
+        ExpandablePageView(
+          animateFirstPage: true,
+          estimatedPageSize: estimatedSize,
+          animationDuration: const Duration(milliseconds: 500),
+          children: [
+            Container(color: red, height: actualHeight),
+          ],
         ),
       );
 
@@ -555,18 +556,14 @@ void main() {
       final double estimatedSize = 50;
       final double actualHeight = 200;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ExpandablePageView(
-              animateFirstPage: false,
-              estimatedPageSize: estimatedSize,
-              animationDuration: const Duration(milliseconds: 500),
-              children: [
-                Container(color: Colors.red, height: actualHeight),
-              ],
-            ),
-          ),
+      await tester.pumpAppFrame(
+        ExpandablePageView(
+          animateFirstPage: false,
+          estimatedPageSize: estimatedSize,
+          animationDuration: const Duration(milliseconds: 500),
+          children: [
+            Container(color: red, height: actualHeight),
+          ],
         ),
       );
 
@@ -581,19 +578,15 @@ void main() {
       final double estimatedSize = 50;
       final double actualHeight = 200;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ExpandablePageView.builder(
-              animateFirstPage: true,
-              estimatedPageSize: estimatedSize,
-              animationDuration: const Duration(milliseconds: 500),
-              itemCount: 1,
-              itemBuilder: (context, index) {
-                return Container(color: Colors.red, height: actualHeight);
-              },
-            ),
-          ),
+      await tester.pumpAppFrame(
+        ExpandablePageView.builder(
+          animateFirstPage: true,
+          estimatedPageSize: estimatedSize,
+          animationDuration: const Duration(milliseconds: 500),
+          itemCount: 1,
+          itemBuilder: (context, index) {
+            return Container(color: red, height: actualHeight);
+          },
         ),
       );
 
@@ -613,20 +606,16 @@ void main() {
     testWidgets('''given animateFirstPage is true and page is navigated after first load
     then subsequent animations should still work correctly''', (tester) async {
       final controller = PageController();
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ExpandablePageView(
-              controller: controller,
-              animateFirstPage: true,
-              estimatedPageSize: 50,
-              animationDuration: const Duration(milliseconds: 100),
-              children: [
-                Container(color: Colors.red, height: 100),
-                Container(color: Colors.blue, height: 200),
-              ],
-            ),
-          ),
+      await tester.pumpAppFrame(
+        ExpandablePageView(
+          controller: controller,
+          animateFirstPage: true,
+          estimatedPageSize: 50,
+          animationDuration: const Duration(milliseconds: 100),
+          children: [
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+          ],
         ),
       );
       await tester.pumpAndSettle();
@@ -653,9 +642,9 @@ void main() {
         ExpandablePageView(
           onPageChanged: (page) => changedPage = page,
           children: [
-            Container(color: Colors.red, height: 200),
-            Container(color: Colors.blue, height: 300),
-            Container(color: Colors.green, height: 400),
+            Container(color: red, height: 200),
+            Container(color: blue, height: 300),
+            Container(color: green, height: 400),
           ],
         ),
       );
@@ -678,9 +667,9 @@ void main() {
           controller: controller,
           onPageChanged: (page) => changedPage = page,
           children: [
-            Container(color: Colors.red, height: 200),
-            Container(color: Colors.blue, height: 300),
-            Container(color: Colors.green, height: 400),
+            Container(color: red, height: 200),
+            Container(color: blue, height: 300),
+            Container(color: green, height: 400),
           ],
         ),
       );
@@ -724,8 +713,8 @@ void main() {
       await tester.pumpApp(
         ExpandablePageView(
           children: [
-            Container(color: Colors.red, height: firstChildHeight),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: firstChildHeight),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -735,10 +724,10 @@ void main() {
       await tester.pumpApp(
         ExpandablePageView(
           children: [
-            Container(color: Colors.red, height: firstChildHeight),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
-            Container(color: Colors.yellow, height: 400),
+            Container(color: red, height: firstChildHeight),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
+            Container(color: yellow, height: 400),
           ],
         ),
       );
@@ -847,9 +836,9 @@ void main() {
         ExpandablePageView(
           controller: controller,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -869,9 +858,9 @@ void main() {
         ExpandablePageView(
           controller: controller,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -895,8 +884,8 @@ void main() {
         ExpandablePageView(
           controller: controller,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -919,8 +908,8 @@ void main() {
         ExpandablePageView(
           controller: controller,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -945,8 +934,8 @@ void main() {
       await tester.pumpApp(
         ExpandablePageView(
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -965,9 +954,9 @@ void main() {
       await tester.pumpApp(
         ExpandablePageView(
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -1032,8 +1021,8 @@ void main() {
         ExpandablePageView(
           reverse: true,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -1059,7 +1048,7 @@ void main() {
         ExpandablePageView(
           controller: controller,
           children: [
-            Container(color: Colors.red, height: 100),
+            Container(color: red, height: 100),
           ],
         ),
       );
@@ -1080,7 +1069,7 @@ void main() {
       await tester.pumpApp(
         ExpandablePageView(
           children: [
-            Container(color: Colors.red, height: 100),
+            Container(color: red, height: 100),
           ],
         ),
       );
@@ -1101,8 +1090,8 @@ void main() {
         ExpandablePageView(
           controller: externalController,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -1112,8 +1101,8 @@ void main() {
       await tester.pumpApp(
         ExpandablePageView(
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -1138,9 +1127,9 @@ void main() {
         ExpandablePageView(
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -1159,8 +1148,8 @@ void main() {
         ExpandablePageView(
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -1173,20 +1162,16 @@ void main() {
     then PageView should update its size''', (tester) async {
       final heightNotifier = ValueNotifier<double>(100);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ValueListenableBuilder<double>(
-              valueListenable: heightNotifier,
-              builder: (context, height, _) {
-                return ExpandablePageView(
-                  children: [
-                    Container(color: Colors.red, height: height),
-                  ],
-                );
-              },
-            ),
-          ),
+      await tester.pumpAppFrame(
+        ValueListenableBuilder<double>(
+          valueListenable: heightNotifier,
+          builder: (context, height, _) {
+            return ExpandablePageView(
+              children: [
+                Container(color: red, height: height),
+              ],
+            );
+          },
         ),
       );
       await tester.pumpAndSettle();
@@ -1209,9 +1194,9 @@ void main() {
         ExpandablePageView(
           controller: controller,
           children: [
-            Container(color: Colors.red, height: 100), // Current page (small)
-            Container(color: Colors.blue, height: 300), // Visible adjacent (tall)
-            Container(color: Colors.green, height: 200),
+            Container(color: red, height: 100), // Current page (small)
+            Container(color: blue, height: 300), // Visible adjacent (tall)
+            Container(color: green, height: 200),
           ],
         ),
       );
@@ -1250,10 +1235,10 @@ void main() {
         ExpandablePageView(
           controller: controller,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 300),
-            Container(color: Colors.green, height: 150),
-            Container(color: Colors.yellow, height: 400),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 300),
+            Container(color: green, height: 150),
+            Container(color: yellow, height: 400),
           ],
         ),
       );
@@ -1274,8 +1259,8 @@ void main() {
       await tester.pumpApp(
         ExpandablePageView(
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 300),
           ],
         ),
       );
@@ -1293,9 +1278,9 @@ void main() {
           controller: controller,
           padEnds: false,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 250),
-            Container(color: Colors.green, height: 180),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 250),
+            Container(color: green, height: 180),
           ],
         ),
       );
@@ -1316,9 +1301,9 @@ void main() {
           loop: true,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -1359,9 +1344,9 @@ void main() {
           loop: true,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -1436,8 +1421,8 @@ void main() {
           loop: true,
           onPageChanged: (page) => receivedPages.add(page),
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -1461,9 +1446,9 @@ void main() {
           loop: true,
           controller: PageController(initialPage: 1),
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -1478,8 +1463,8 @@ void main() {
         ExpandablePageView(
           loop: true,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -1513,9 +1498,9 @@ void main() {
           loop: true,
           controller: PageController(viewportFraction: 0.5),
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 300),
-            Container(color: Colors.green, height: 150),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 300),
+            Container(color: green, height: 150),
           ],
         ),
       );
@@ -1546,8 +1531,8 @@ void main() {
           scrollDirection: Axis.vertical,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, width: 100),
-            Container(color: Colors.blue, width: 200),
+            Container(color: red, width: 100),
+            Container(color: blue, width: 200),
           ],
         ),
       );
@@ -1578,8 +1563,8 @@ void main() {
           animateFirstPage: true,
           estimatedPageSize: 50,
           children: [
-            Container(color: Colors.red, height: 200),
-            Container(color: Colors.blue, height: 300),
+            Container(color: red, height: 200),
+            Container(color: blue, height: 300),
           ],
         ),
       );
@@ -1596,8 +1581,8 @@ void main() {
         ExpandablePageView(
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -1632,7 +1617,7 @@ void main() {
           loop: true,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
+            Container(color: red, height: 100),
           ],
         ),
       );
@@ -1657,9 +1642,9 @@ void main() {
           reverse: true,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -1691,9 +1676,9 @@ void main() {
           loop: false,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -1712,9 +1697,9 @@ void main() {
           loop: true,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -1742,9 +1727,9 @@ void main() {
           loop: true,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -1765,9 +1750,9 @@ void main() {
           loop: false,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -1786,19 +1771,15 @@ void main() {
       final double estimatedSize = 150;
       final double actualHeight = 200;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ExpandablePageView(
-              loop: true,
-              estimatedPageSize: estimatedSize,
-              animationDuration: const Duration(milliseconds: 100),
-              children: [
-                Container(color: Colors.red, height: actualHeight),
-                Container(color: Colors.blue, height: 300),
-              ],
-            ),
-          ),
+      await tester.pumpAppFrame(
+        ExpandablePageView(
+          loop: true,
+          estimatedPageSize: estimatedSize,
+          animationDuration: const Duration(milliseconds: 100),
+          children: [
+            Container(color: red, height: actualHeight),
+            Container(color: blue, height: 300),
+          ],
         ),
       );
 
@@ -1814,9 +1795,9 @@ void main() {
           loop: true,
           controller: PageController(viewportFraction: 0.5),
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 300),
-            Container(color: Colors.green, height: 150),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 300),
+            Container(color: green, height: 150),
           ],
         ),
       );
@@ -1844,8 +1825,8 @@ void main() {
         ExpandablePageView(
           loop: false,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -1857,9 +1838,9 @@ void main() {
         ExpandablePageView(
           loop: true,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -1888,9 +1869,9 @@ void main() {
         ExpandablePageView(
           loop: true,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -1909,8 +1890,8 @@ void main() {
         ExpandablePageView(
           loop: false,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -1951,9 +1932,9 @@ void main() {
           loop: true,
           controller: PageController(initialPage: 5), // 5 % 3 = 2
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -1973,9 +1954,9 @@ void main() {
           loop: true,
           controller: PageController(initialPage: 0),
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2002,9 +1983,9 @@ void main() {
           controller: controller1,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2025,9 +2006,9 @@ void main() {
           controller: controller2, // Different controller with initialPage: 2
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2054,9 +2035,9 @@ void main() {
           pageSnapping: false,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2085,8 +2066,8 @@ void main() {
           loop: true,
           clipBehavior: Clip.none,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -2115,9 +2096,9 @@ void main() {
           restorationId: 'test_loop_restoration',
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2147,8 +2128,8 @@ void main() {
           allowImplicitScrolling: true,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -2183,9 +2164,9 @@ then jumpToPage navigates to the correct real page''', (tester) async {
           controller: controller,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2211,9 +2192,9 @@ then widget creates internal standard controller at current page''', (tester) as
           controller: controller,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2232,9 +2213,9 @@ then widget creates internal standard controller at current page''', (tester) as
           loop: false,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2255,9 +2236,9 @@ then widget re-uses the ExpandablePageController''', (tester) async {
           loop: false,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2269,9 +2250,9 @@ then widget re-uses the ExpandablePageController''', (tester) async {
           controller: controller,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2295,9 +2276,9 @@ then animateToPage navigates to the correct real page''', (tester) async {
           controller: controller,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2326,11 +2307,11 @@ then animateToPage to last page takes shortest path (backward)''', (tester) asyn
           controller: controller,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
-            Container(color: Colors.yellow, height: 400),
-            Container(color: Colors.orange, height: 500),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
+            Container(color: yellow, height: 400),
+            Container(color: orange, height: 500),
           ],
         ),
       );
@@ -2356,9 +2337,9 @@ then page getter returns real page index''', (tester) async {
           loop: true,
           controller: controller,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2385,9 +2366,9 @@ then jumpToPage(0) wraps correctly''', (tester) async {
           controller: controller,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2406,7 +2387,7 @@ with builder constructor
 then jumpToPage works correctly''', (tester) async {
       final controller = ExpandablePageController(itemCount: 3);
       final heights = [100.0, 200.0, 300.0];
-      final colors = [Colors.red, Colors.blue, Colors.green];
+      final colors = [red, blue, green];
       int? lastChangedPage;
 
       await tester.pumpApp(
@@ -2446,9 +2427,9 @@ then jumpToPage works correctly''', (tester) async {
           controller: controller,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2469,9 +2450,9 @@ then manual swiping still works and loops''', (tester) async {
           controller: controller,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2521,9 +2502,9 @@ then manual swiping still works and loops''', (tester) async {
           controller: controllerA,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2542,9 +2523,9 @@ then manual swiping still works and loops''', (tester) async {
           controller: controllerB,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2576,9 +2557,9 @@ then manual swiping still works and loops''', (tester) async {
         ExpandablePageView(
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2599,9 +2580,9 @@ then manual swiping still works and loops''', (tester) async {
           controller: controllerB,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2627,9 +2608,9 @@ then manual swiping still works and loops''', (tester) async {
           controller: controllerA,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2646,9 +2627,9 @@ then manual swiping still works and loops''', (tester) async {
         ExpandablePageView(
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2683,9 +2664,9 @@ then manual swiping still works and loops''', (tester) async {
           controller: controllerA,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2700,9 +2681,9 @@ then manual swiping still works and loops''', (tester) async {
           controller: controllerB,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2718,9 +2699,9 @@ then manual swiping still works and loops''', (tester) async {
           controller: controllerC,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2751,9 +2732,9 @@ then manual swiping still works and loops''', (tester) async {
         ExpandablePageView(
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2770,9 +2751,9 @@ then manual swiping still works and loops''', (tester) async {
           controller: controller,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2789,9 +2770,9 @@ then manual swiping still works and loops''', (tester) async {
         ExpandablePageView(
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2818,9 +2799,9 @@ then manual swiping still works and loops''', (tester) async {
           loop: true,
           controller: PageController(viewportFraction: 0.8),
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2851,9 +2832,9 @@ then manual swiping still works and loops''', (tester) async {
             key: ValueKey(i),
             loop: i.isEven,
             children: [
-              Container(color: Colors.red, height: 100),
-              Container(color: Colors.blue, height: 200),
-              Container(color: Colors.green, height: 300),
+              Container(color: red, height: 100),
+              Container(color: blue, height: 200),
+              Container(color: green, height: 300),
             ],
           ),
         );
@@ -2872,9 +2853,9 @@ then manual swiping still works and loops''', (tester) async {
           loop: false,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -2893,8 +2874,8 @@ then manual swiping still works and loops''', (tester) async {
           loop: true,
           estimatedPageSize: 0,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -2924,8 +2905,8 @@ then manual swiping still works and loops''', (tester) async {
         ExpandablePageView(
           loop: true,
           children: [
-            Container(color: Colors.red, height: heights[0]),
-            Container(color: Colors.blue, height: heights[1]),
+            Container(color: red, height: heights[0]),
+            Container(color: blue, height: heights[1]),
           ],
         ),
       );
@@ -2937,8 +2918,8 @@ then manual swiping still works and loops''', (tester) async {
         ExpandablePageView(
           loop: true,
           children: [
-            Container(color: Colors.red, height: 150), // Changed from 100
-            Container(color: Colors.blue, height: 250), // Changed from 200
+            Container(color: red, height: 150), // Changed from 100
+            Container(color: blue, height: 250), // Changed from 200
           ],
         ),
       );
@@ -2999,8 +2980,8 @@ then manual swiping still works and loops''', (tester) async {
           loop: true,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -3027,9 +3008,9 @@ then manual swiping still works and loops''', (tester) async {
           loop: true,
           controller: PageController(initialPage: 2),
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -3041,8 +3022,8 @@ then manual swiping still works and loops''', (tester) async {
         ExpandablePageView(
           loop: true,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -3067,8 +3048,8 @@ then manual swiping still works and loops''', (tester) async {
           controller: controller,
           physics: const NeverScrollableScrollPhysics(),
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -3092,8 +3073,8 @@ then manual swiping still works and loops''', (tester) async {
           loop: true,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
           ],
         ),
       );
@@ -3124,9 +3105,9 @@ then manual swiping still works and loops''', (tester) async {
           loop: true,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -3145,9 +3126,9 @@ then manual swiping still works and loops''', (tester) async {
           loop: false,
           onPageChanged: (page) => lastChangedPage = page,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -3171,10 +3152,10 @@ then manual swiping still works and loops''', (tester) async {
           loop: true,
           controller: PageController(viewportFraction: 0.3),
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 500), // Tallest
-            Container(color: Colors.yellow, height: 150),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 500), // Tallest
+            Container(color: yellow, height: 150),
           ],
         ),
       );
@@ -3195,9 +3176,9 @@ then widget uses the new controller''', (tester) async {
           loop: true,
           controller: controller1,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -3210,9 +3191,9 @@ then widget uses the new controller''', (tester) async {
           loop: true,
           controller: controller2,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -3230,9 +3211,9 @@ then controller itemCount is updated''', (tester) async {
           loop: true,
           controller: controller,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
           ],
         ),
       );
@@ -3245,10 +3226,10 @@ then controller itemCount is updated''', (tester) async {
           loop: true,
           controller: controller,
           children: [
-            Container(color: Colors.red, height: 100),
-            Container(color: Colors.blue, height: 200),
-            Container(color: Colors.green, height: 300),
-            Container(color: Colors.yellow, height: 400),
+            Container(color: red, height: 100),
+            Container(color: blue, height: 200),
+            Container(color: green, height: 300),
+            Container(color: yellow, height: 400),
           ],
         ),
       );
@@ -3845,13 +3826,13 @@ then controller itemCount is updated''', (tester) async {
 Color colorForIndex(int index) {
   switch (index) {
     case 0:
-      return Colors.red;
+      return red;
     case 1:
-      return Colors.blue;
+      return blue;
     case 2:
-      return Colors.green;
+      return green;
     default:
-      return Colors.yellow;
+      return yellow;
   }
 }
 

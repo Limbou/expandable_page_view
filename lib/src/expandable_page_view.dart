@@ -5,7 +5,7 @@ import 'dart:math';
 import 'package:expandable_page_view/src/expandable_page_controller.dart';
 import 'package:expandable_page_view/src/size_reporting_widget.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 typedef WidgetBuilder = Widget Function(BuildContext context, int index);
 
