@@ -138,4 +138,10 @@ extension LoopPageMapping on ExpandablePageController {
     final originIndex = virtualIndex - _loopOrigin;
     return ((originIndex % _itemCount) + _itemCount) % _itemCount;
   }
+
+  /// Remaps instead of scrolling, so the PageView stays mid-range and can loop both ways.
+  void startAt(int realPage) {
+    assert(realPage >= 0 && realPage < _itemCount, 'realPage must be in range [0, $_itemCount)');
+    _loopOrigin = initialPage - realPage;
+  }
 }
