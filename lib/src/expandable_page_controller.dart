@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/widgets.dart';
 
 /// A [PageController] that supports loop (infinite scroll) mode for
@@ -31,6 +33,9 @@ import 'package:flutter/widgets.dart';
 class ExpandablePageController extends PageController {
   int _itemCount;
 
+  /// Virtual page of real page 0; [itemCount] changes shift it to keep the shown page.
+  int _loopOrigin = 0;
+
   /// Large multiplier for initial page offset in loop mode.
   /// This allows scrolling in both directions from the start.
   static const int loopMultiplier = 10000;
@@ -54,16 +59,19 @@ class ExpandablePageController extends PageController {
         super(initialPage: loopMultiplier * itemCount + initialPage);
 
   /// The number of real pages.
+  ///
+  /// Changing it keeps [realPage] without scrolling, or shows the last page if [realPage] is gone.
   int get itemCount => _itemCount;
   set itemCount(int value) {
     assert(value > 0, 'itemCount must be greater than 0');
+    if (value == _itemCount) return;
+    final currentVirtual = _currentVirtualPage;
+    final newRealPage = min(toRealIndex(currentVirtual), value - 1);
     _itemCount = value;
+    _loopOrigin = currentVirtual - newRealPage;
   }
 
-  /// Converts a virtual index to a real index (0 to [itemCount]-1).
-  int _toRealIndex(int virtualIndex) {
-    return ((virtualIndex % _itemCount) + _itemCount) % _itemCount;
-  }
+  int get _currentVirtualPage => hasClients ? super.page?.round() ?? initialPage : initialPage;
 
   /// The current real page as a fraction (e.g., 2.35 means 35% between
   /// page 2 and page 3).
@@ -76,17 +84,14 @@ class ExpandablePageController extends PageController {
   double? get page {
     final virtualPage = super.page;
     if (virtualPage == null) return null;
-    return ((virtualPage % _itemCount) + _itemCount) % _itemCount;
+    final originPage = virtualPage - _loopOrigin;
+    return ((originPage % _itemCount) + _itemCount) % _itemCount;
   }
 
   /// The current real page index (rounded).
   ///
   /// If the controller is not yet attached, returns the initial page.
-  int get realPage {
-    if (!hasClients) return _toRealIndex(initialPage);
-    final virtualPage = super.page?.round() ?? initialPage;
-    return _toRealIndex(virtualPage);
-  }
+  int get realPage => toRealIndex(_currentVirtualPage);
 
   /// Jumps to the given real page index using the shortest path.
   @override
@@ -113,8 +118,8 @@ class ExpandablePageController extends PageController {
   /// Finds the closest virtual page for the given real page index,
   /// choosing the shortest path (fewest pages to scroll).
   int _closestVirtualPage(int targetRealPage) {
-    final currentVirtual = hasClients ? super.page?.round() ?? initialPage : initialPage;
-    final currentReal = _toRealIndex(currentVirtual);
+    final currentVirtual = _currentVirtualPage;
+    final currentReal = toRealIndex(currentVirtual);
 
     // Forward and backward deltas
     int forwardDelta = (targetRealPage - currentReal) % _itemCount;
@@ -124,5 +129,13 @@ class ExpandablePageController extends PageController {
     final delta = forwardDelta.abs() <= backwardDelta.abs() ? forwardDelta : backwardDelta;
 
     return currentVirtual + delta;
+  }
+}
+
+/// Shared with [ExpandablePageView]; an extension so it stays out of the exported API.
+extension LoopPageMapping on ExpandablePageController {
+  int toRealIndex(int virtualIndex) {
+    final originIndex = virtualIndex - _loopOrigin;
+    return ((originIndex % _itemCount) + _itemCount) % _itemCount;
   }
 }
