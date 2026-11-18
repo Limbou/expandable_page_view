@@ -43,5 +43,36 @@ void main() {
       expect(controller.keepPage, false);
       controller.dispose();
     });
+
+    test('keeps realPage when itemCount increases before being attached', () {
+      final controller = ExpandablePageController(itemCount: 3, initialPage: 1);
+      controller.itemCount = 7;
+      expect(controller.itemCount, 7);
+      expect(controller.realPage, 1);
+      controller.dispose();
+    });
+
+    test('keeps realPage when itemCount decreases and the page still exists', () {
+      final controller = ExpandablePageController(itemCount: 4, initialPage: 1);
+      controller.itemCount = 3;
+      expect(controller.realPage, 1);
+      controller.dispose();
+    });
+
+    test('moves realPage to the last page when itemCount removes the current page', () {
+      final controller = ExpandablePageController(itemCount: 3, initialPage: 2);
+      controller.itemCount = 2;
+      expect(controller.realPage, 1);
+      controller.dispose();
+    });
+
+    test('keeps realPage across several itemCount changes', () {
+      final controller = ExpandablePageController(itemCount: 2, initialPage: 1);
+      controller.itemCount = 3;
+      controller.itemCount = 5;
+      controller.itemCount = 4;
+      expect(controller.realPage, 1);
+      controller.dispose();
+    });
   });
 }

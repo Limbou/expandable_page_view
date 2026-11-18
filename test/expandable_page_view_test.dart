@@ -797,6 +797,46 @@ void main() {
 
       expect(tester.pageViewHeight, heightForIndex(3, baseHeight));
     });
+
+    testWidgets('''given builder is on its last page
+    and onPageChanged calls setState in the parent
+    when itemCount decreases removing the current page
+    then last remaining page is displayed
+    and the parent receives it without errors''', (tester) async {
+      int itemCount = 3;
+      int? reportedPage;
+      late StateSetter setParentState;
+      await tester.pumpApp(
+        StatefulBuilder(
+          builder: (context, setState) {
+            setParentState = setState;
+            return ExpandablePageView.builder(
+              itemCount: itemCount,
+              onPageChanged: (page) => setState(() => reportedPage = page),
+              itemBuilder: (context, index) => Container(
+                color: colorForIndex(index),
+                height: heightForIndex(index, 100),
+              ),
+            );
+          },
+        ),
+      );
+      final pageView = find.byType(ExpandablePageView);
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(reportedPage, 2);
+
+      setParentState(() => itemCount = 2);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(blueContainer, findsOneWidget);
+      expect(greenContainer, findsNothing);
+      expect(tester.pageViewHeight, 200);
+      expect(reportedPage, 1);
+    });
   });
 
   group("ExpandablePageView programmatic navigation", () {
@@ -3215,6 +3255,349 @@ then controller itemCount is updated''', (tester) async {
       );
 
       expect(controller.itemCount, 4);
+    });
+  });
+
+  group("ExpandablePageView loop itemCount changes", () {
+    Widget loopBuilder(
+      int itemCount, {
+      PageController? controller,
+      ValueChanged<int>? onPageChanged,
+    }) {
+      return ExpandablePageView.builder(
+        loop: true,
+        controller: controller,
+        onPageChanged: onPageChanged,
+        itemCount: itemCount,
+        itemBuilder: (context, index) => Container(
+          color: colorForIndex(index),
+          height: heightForIndex(index, 100),
+        ),
+      );
+    }
+
+    Widget loopChildren(int count) {
+      return ExpandablePageView(
+        loop: true,
+        children: [
+          for (int i = 0; i < count; i++)
+            Container(color: colorForIndex(i), height: heightForIndex(i, 100)),
+        ],
+      );
+    }
+
+    testWidgets('''given loop is true with builder on first page
+    when itemCount increases from 2 to 3
+    then first page stays displayed with its height''', (tester) async {
+      await tester.pumpApp(loopBuilder(2));
+      expect(tester.pageViewHeight, 100);
+
+      await tester.pumpApp(loopBuilder(3));
+
+      expect(tester.takeException(), isNull);
+      expect(redContainer, findsOneWidget);
+      expect(greenContainer, findsNothing);
+      expect(tester.pageViewHeight, 100);
+    });
+
+    testWidgets('''given loop is true with children on first page
+    when children count increases from 2 to 3
+    then first page stays displayed with its height''', (tester) async {
+      await tester.pumpApp(loopChildren(2));
+      expect(tester.pageViewHeight, 100);
+
+      await tester.pumpApp(loopChildren(3));
+
+      expect(tester.takeException(), isNull);
+      expect(redContainer, findsOneWidget);
+      expect(greenContainer, findsNothing);
+      expect(tester.pageViewHeight, 100);
+    });
+
+    testWidgets('''given loop is true with ExpandablePageController on first page
+    when itemCount increases from 2 to 3
+    then first page stays displayed and controller reports it''', (tester) async {
+      final controller = ExpandablePageController(itemCount: 2);
+      await tester.pumpApp(loopBuilder(2, controller: controller));
+
+      await tester.pumpApp(loopBuilder(3, controller: controller));
+
+      expect(tester.takeException(), isNull);
+      expect(controller.itemCount, 3);
+      expect(controller.realPage, 0);
+      expect(redContainer, findsOneWidget);
+      expect(greenContainer, findsNothing);
+      expect(tester.pageViewHeight, 100);
+
+      controller.dispose();
+    });
+
+    testWidgets('''given loop is true on second page
+    when itemCount increases from 3 to 4
+    then second page stays displayed with its height''', (tester) async {
+      await tester.pumpApp(loopBuilder(3));
+      await tester.drag(find.byType(ExpandablePageView), nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(blueContainer, findsOneWidget);
+
+      await tester.pumpApp(loopBuilder(4));
+
+      expect(tester.takeException(), isNull);
+      expect(blueContainer, findsOneWidget);
+      expect(tester.pageViewHeight, 200);
+    });
+
+    testWidgets('''given loop is true on second page
+    when itemCount decreases from 4 to 3
+    then second page stays displayed with its height
+    and onPageChanged is not called''', (tester) async {
+      final changedPages = <int>[];
+      await tester.pumpApp(loopBuilder(4, onPageChanged: changedPages.add));
+      await tester.drag(find.byType(ExpandablePageView), nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(changedPages, [1]);
+
+      await tester.pumpApp(loopBuilder(3, onPageChanged: changedPages.add));
+
+      expect(tester.takeException(), isNull);
+      expect(blueContainer, findsOneWidget);
+      expect(greenContainer, findsNothing);
+      expect(tester.pageViewHeight, 200);
+      expect(changedPages, [1]);
+    });
+
+    testWidgets('''given loop is true on second page
+    when itemCount decreases from 3 to 2
+    then second page stays displayed with its height''', (tester) async {
+      await tester.pumpApp(loopBuilder(3));
+      await tester.drag(find.byType(ExpandablePageView), nextPageScrollOffset);
+      await tester.pumpAndSettle();
+
+      await tester.pumpApp(loopBuilder(2));
+
+      expect(tester.takeException(), isNull);
+      expect(blueContainer, findsOneWidget);
+      expect(tester.pageViewHeight, 200);
+    });
+
+    testWidgets('''given loop is true on third page
+    when itemCount decreases from 3 to 2 removing the current page
+    then last remaining page is displayed with its height
+    and onPageChanged is called with it''', (tester) async {
+      final changedPages = <int>[];
+      await tester.pumpApp(loopBuilder(3, onPageChanged: changedPages.add));
+      final pageView = find.byType(ExpandablePageView);
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(changedPages, [1, 2]);
+      expect(tester.pageViewHeight, 300);
+
+      await tester.pumpApp(loopBuilder(2, onPageChanged: changedPages.add));
+
+      expect(tester.takeException(), isNull);
+      expect(blueContainer, findsOneWidget);
+      expect(greenContainer, findsNothing);
+      expect(tester.pageViewHeight, 200);
+      expect(changedPages, [1, 2, 1]);
+    });
+
+    testWidgets('''given loop is true on third page
+    and onPageChanged calls setState in the parent
+    when itemCount decreases from 3 to 2 removing the current page
+    then last remaining page is displayed
+    and the parent receives it without errors''', (tester) async {
+      int itemCount = 3;
+      int? reportedPage;
+      late StateSetter setParentState;
+      await tester.pumpApp(
+        StatefulBuilder(
+          builder: (context, setState) {
+            setParentState = setState;
+            return loopBuilder(
+              itemCount,
+              onPageChanged: (page) => setState(() => reportedPage = page),
+            );
+          },
+        ),
+      );
+      final pageView = find.byType(ExpandablePageView);
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(reportedPage, 2);
+
+      setParentState(() => itemCount = 2);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(blueContainer, findsOneWidget);
+      expect(greenContainer, findsNothing);
+      expect(tester.pageViewHeight, 200);
+      expect(reportedPage, 1);
+    });
+
+    testWidgets('''given loop is true and itemCount increased from 2 to 3
+    when swiping forward and backward
+    then pages cycle through all items in order''', (tester) async {
+      final changedPages = <int>[];
+      await tester.pumpApp(loopBuilder(2, onPageChanged: changedPages.add));
+      await tester.pumpApp(loopBuilder(3, onPageChanged: changedPages.add));
+      final pageView = find.byType(ExpandablePageView);
+
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(blueContainer, findsOneWidget);
+      expect(tester.pageViewHeight, 200);
+
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(greenContainer, findsOneWidget);
+      expect(tester.pageViewHeight, 300);
+
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(redContainer, findsOneWidget);
+      expect(tester.pageViewHeight, 100);
+
+      await tester.drag(pageView, previousPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(greenContainer, findsOneWidget);
+      expect(tester.pageViewHeight, 300);
+
+      expect(changedPages, [1, 2, 0, 2]);
+    });
+
+    testWidgets('''given loop is true on second page and itemCount decreased from 4 to 3
+    when swiping forward and backward
+    then pages cycle through the remaining items in order''', (tester) async {
+      final changedPages = <int>[];
+      await tester.pumpApp(loopBuilder(4, onPageChanged: changedPages.add));
+      final pageView = find.byType(ExpandablePageView);
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      await tester.pumpApp(loopBuilder(3, onPageChanged: changedPages.add));
+
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(greenContainer, findsOneWidget);
+      expect(tester.pageViewHeight, 300);
+
+      await tester.drag(pageView, nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(redContainer, findsOneWidget);
+      expect(tester.pageViewHeight, 100);
+
+      await tester.drag(pageView, previousPageScrollOffset);
+      await tester.pumpAndSettle();
+      await tester.drag(pageView, previousPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(blueContainer, findsOneWidget);
+      expect(tester.pageViewHeight, 200);
+
+      expect(changedPages, [1, 2, 0, 2, 1]);
+    });
+
+    testWidgets('''given loop is true with ExpandablePageController on second page
+    when itemCount decreases from 4 to 3
+    then realPage, page, jumpToPage and animateToPage use real indices''', (tester) async {
+      final controller = ExpandablePageController(itemCount: 4, initialPage: 1);
+      final changedPages = <int>[];
+      await tester.pumpApp(loopBuilder(4, controller: controller, onPageChanged: changedPages.add));
+
+      await tester.pumpApp(loopBuilder(3, controller: controller, onPageChanged: changedPages.add));
+
+      expect(controller.realPage, 1);
+      expect(controller.page, closeTo(1.0, 0.01));
+      expect(blueContainer, findsOneWidget);
+
+      controller.jumpToPage(2);
+      await tester.pumpAndSettle();
+      expect(controller.realPage, 2);
+      expect(controller.page, closeTo(2.0, 0.01));
+      expect(greenContainer, findsOneWidget);
+      expect(tester.pageViewHeight, 300);
+
+      controller.animateToPage(0, duration: const Duration(milliseconds: 300), curve: Curves.ease);
+      await tester.pumpAndSettle();
+      expect(controller.realPage, 0);
+      expect(redContainer, findsOneWidget);
+      expect(tester.pageViewHeight, 100);
+
+      controller.animateToPage(1, duration: const Duration(milliseconds: 300), curve: Curves.ease);
+      await tester.pumpAndSettle();
+      expect(controller.realPage, 1);
+      expect(blueContainer, findsOneWidget);
+      expect(tester.pageViewHeight, 200);
+
+      expect(changedPages, [2, 0, 1]);
+
+      controller.dispose();
+    });
+
+    testWidgets('''given loop is true with ExpandablePageController on first page
+    when itemCount increases from 2 to 3
+    then jumpToPage reaches the new page and swiping wraps around''', (tester) async {
+      final controller = ExpandablePageController(itemCount: 2);
+      await tester.pumpApp(loopBuilder(2, controller: controller));
+      await tester.pumpApp(loopBuilder(3, controller: controller));
+
+      controller.jumpToPage(2);
+      await tester.pumpAndSettle();
+      expect(controller.realPage, 2);
+      expect(greenContainer, findsOneWidget);
+      expect(tester.pageViewHeight, 300);
+
+      await tester.drag(find.byType(ExpandablePageView), nextPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(controller.realPage, 0);
+      expect(redContainer, findsOneWidget);
+      expect(tester.pageViewHeight, 100);
+
+      controller.dispose();
+    });
+
+    testWidgets('''given loop is false with 2 items
+    when loop is enabled with an ExpandablePageController and a third item in the same update
+    then the page the controller reports is displayed without errors''', (tester) async {
+      final controller = ExpandablePageController(itemCount: 3, initialPage: 2);
+      await tester.pumpApp(
+        ExpandablePageView.builder(
+          itemCount: 2,
+          itemBuilder: (context, index) => Container(
+            color: colorForIndex(index),
+            height: heightForIndex(index, 100),
+          ),
+        ),
+      );
+
+      await tester.pumpApp(loopBuilder(3, controller: controller));
+
+      expect(tester.takeException(), isNull);
+      expect(tester.pageViewHeight, heightForIndex(controller.realPage, 100));
+      expect(find.byWidgetPredicate((widget) {
+        return widget is Container && widget.color == colorForIndex(controller.realPage);
+      }), findsOneWidget);
+
+      controller.dispose();
+    });
+
+    testWidgets('''given loop is true with 2 items and no controller
+    when an ExpandablePageController and a third item are provided in the same update
+    then the controller's initial page is displayed without errors''', (tester) async {
+      final controller = ExpandablePageController(itemCount: 3, initialPage: 2);
+      await tester.pumpApp(loopBuilder(2));
+
+      await tester.pumpApp(loopBuilder(3, controller: controller));
+
+      expect(tester.takeException(), isNull);
+      expect(controller.realPage, 2);
+      expect(greenContainer, findsOneWidget);
+      expect(tester.pageViewHeight, 300);
+
+      controller.dispose();
     });
   });
 }
