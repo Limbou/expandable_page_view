@@ -2263,7 +2263,6 @@ then widget re-uses the ExpandablePageController''', (tester) async {
       );
 
       // Toggle loop on — widget should use the ExpandablePageController
-      // Page resets to controller's initialPage (0)
       await tester.pumpApp(
         ExpandablePageView(
           loop: true,
@@ -2277,7 +2276,7 @@ then widget re-uses the ExpandablePageController''', (tester) async {
         ),
       );
 
-      expect(tester.pageViewHeight, 100); // page 0 (controller's initialPage)
+      expect(tester.pageViewHeight, 100);
 
       // Programmatic navigation should work
       controller.jumpToPage(1);
@@ -3561,7 +3560,8 @@ then controller itemCount is updated''', (tester) async {
 
     testWidgets('''given loop is false with 2 items
     when loop is enabled with an ExpandablePageController and a third item in the same update
-    then the page the controller reports is displayed without errors''', (tester) async {
+    then the first page stays displayed, the controller reports it
+    and swiping backward reaches the new item''', (tester) async {
       final controller = ExpandablePageController(itemCount: 3, initialPage: 2);
       await tester.pumpApp(
         ExpandablePageView.builder(
@@ -3576,10 +3576,15 @@ then controller itemCount is updated''', (tester) async {
       await tester.pumpApp(loopBuilder(3, controller: controller));
 
       expect(tester.takeException(), isNull);
-      expect(tester.pageViewHeight, heightForIndex(controller.realPage, 100));
-      expect(find.byWidgetPredicate((widget) {
-        return widget is Container && widget.color == colorForIndex(controller.realPage);
-      }), findsOneWidget);
+      expect(controller.realPage, 0);
+      expect(redContainer, findsOneWidget);
+      expect(tester.pageViewHeight, 100);
+
+      await tester.drag(find.byType(ExpandablePageView), previousPageScrollOffset);
+      await tester.pumpAndSettle();
+      expect(controller.realPage, 2);
+      expect(greenContainer, findsOneWidget);
+      expect(tester.pageViewHeight, 300);
 
       controller.dispose();
     });
@@ -3596,6 +3601,241 @@ then controller itemCount is updated''', (tester) async {
       expect(controller.realPage, 2);
       expect(greenContainer, findsOneWidget);
       expect(tester.pageViewHeight, 300);
+
+      controller.dispose();
+    });
+  });
+
+  group("ExpandablePageView loop toggle", () {
+    Widget pageView({
+      required bool loop,
+      PageController? controller,
+      ValueChanged<int>? onPageChanged,
+    }) {
+      return ExpandablePageView(
+        loop: loop,
+        controller: controller,
+        onPageChanged: onPageChanged,
+        children: [
+          for (int i = 0; i < 3; i++)
+            Container(color: colorForIndex(i), height: heightForIndex(i, 100)),
+        ],
+      );
+    }
+
+    void expectItem(WidgetTester tester, int index) {
+      for (int i = 0; i < 3; i++) {
+        final item = find.byWidgetPredicate((w) => w is Container && w.color == colorForIndex(i));
+        expect(item, i == index ? findsOneWidget : findsNothing, reason: 'item $i');
+      }
+      expect(tester.pageViewHeight, heightForIndex(index, 100));
+    }
+
+    Future<void> swipe(WidgetTester tester, Offset offset) async {
+      await tester.drag(find.byType(ExpandablePageView), offset);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('''given loop is false on the second page
+    when loop is enabled with an ExpandablePageController
+    then the second page stays displayed in every frame and the controller reports it
+    and swiping wraps around in both directions''', (tester) async {
+      final controller = ExpandablePageController(itemCount: 3);
+      final changedPages = <int>[];
+      await tester.pumpApp(pageView(loop: false, onPageChanged: changedPages.add));
+      await swipe(tester, nextPageScrollOffset);
+      expectItem(tester, 1);
+
+      await tester.pumpAppFrame(
+        pageView(loop: true, controller: controller, onPageChanged: changedPages.add),
+      );
+      expectItem(tester, 1);
+      await tester.pumpAndSettle();
+      expectItem(tester, 1);
+      expect(controller.realPage, 1);
+      expect(controller.page, closeTo(1.0, 0.01));
+      expect(changedPages, [1]);
+
+      await swipe(tester, previousPageScrollOffset);
+      expectItem(tester, 0);
+      expect(controller.realPage, 0);
+      expect(changedPages.last, 0);
+
+      await swipe(tester, previousPageScrollOffset);
+      expectItem(tester, 2);
+      expect(controller.realPage, 2);
+      expect(changedPages.last, 2);
+
+      await swipe(tester, nextPageScrollOffset);
+      expectItem(tester, 0);
+      expect(controller.realPage, 0);
+      expect(changedPages.last, 0);
+
+      await swipe(tester, nextPageScrollOffset);
+      expectItem(tester, 1);
+      expect(controller.realPage, 1);
+      expect(changedPages.last, 1);
+
+      controller.dispose();
+    });
+
+    testWidgets('''given loop is false on the second page with viewportFraction 0.8
+    when loop is enabled with an ExpandablePageController with viewportFraction 0.8
+    then the controller reports the second page
+    and swiping backward wraps around''', (tester) async {
+      final pageController = PageController(viewportFraction: 0.8);
+      final loopController = ExpandablePageController(itemCount: 3, viewportFraction: 0.8);
+      await tester.pumpApp(pageView(loop: false, controller: pageController));
+      await swipe(tester, nextPageScrollOffset);
+      expect(pageController.page, closeTo(1.0, 0.01));
+
+      await tester.pumpApp(pageView(loop: true, controller: loopController));
+      expect(loopController.realPage, 1);
+      expect(loopController.page, closeTo(1.0, 0.01));
+
+      await swipe(tester, previousPageScrollOffset);
+      expect(loopController.realPage, 0);
+      await swipe(tester, previousPageScrollOffset);
+      expect(loopController.realPage, 2);
+      expect(loopController.page, closeTo(2.0, 0.01));
+
+      pageController.dispose();
+      loopController.dispose();
+    });
+
+    testWidgets('''given loop is true on the second page with viewportFraction 0.8
+    when loop is disabled without a controller
+    then the second page stays displayed in every frame''', (tester) async {
+      final controller = ExpandablePageController(itemCount: 3, viewportFraction: 0.8);
+      await tester.pumpApp(pageView(loop: true, controller: controller));
+      await swipe(tester, nextPageScrollOffset);
+      expect(controller.realPage, 1);
+
+      await tester.pumpAppFrame(pageView(loop: false));
+      expectItem(tester, 1);
+      await tester.pumpAndSettle();
+      expectItem(tester, 1);
+
+      await swipe(tester, previousPageScrollOffset);
+      expectItem(tester, 0);
+
+      controller.dispose();
+    });
+
+    for (final (description, createController) in [
+      ('no controller', () => null),
+      ('a PageController', () => PageController()),
+    ]) {
+      testWidgets('''given loop is false on the second page with $description
+    when loop is enabled
+    then the second page stays displayed in every frame
+    and swiping wraps around in both directions''', (tester) async {
+        final controller = createController();
+        final changedPages = <int>[];
+        await tester.pumpApp(
+          pageView(loop: false, controller: controller, onPageChanged: changedPages.add),
+        );
+        await swipe(tester, nextPageScrollOffset);
+        expectItem(tester, 1);
+
+        await tester.pumpAppFrame(
+          pageView(loop: true, controller: controller, onPageChanged: changedPages.add),
+        );
+        expectItem(tester, 1);
+        await tester.pumpAndSettle();
+        expectItem(tester, 1);
+        expect(changedPages, [1]);
+
+        await swipe(tester, previousPageScrollOffset);
+        expectItem(tester, 0);
+        expect(changedPages.last, 0);
+
+        await swipe(tester, previousPageScrollOffset);
+        expectItem(tester, 2);
+        expect(changedPages.last, 2);
+
+        await swipe(tester, nextPageScrollOffset);
+        expectItem(tester, 0);
+        expect(changedPages.last, 0);
+
+        controller?.dispose();
+      });
+    }
+
+    testWidgets('''given loop is true with an ExpandablePageController
+    and swiped backward from the first page to the last one
+    when loop is disabled
+    then the last page stays displayed in every frame
+    and swiping backward reaches the second page''', (tester) async {
+      final controller = ExpandablePageController(itemCount: 3);
+      final changedPages = <int>[];
+      await tester.pumpApp(
+        pageView(loop: true, controller: controller, onPageChanged: changedPages.add),
+      );
+      await swipe(tester, previousPageScrollOffset);
+      expectItem(tester, 2);
+      expect(changedPages, [2]);
+
+      await tester.pumpAppFrame(pageView(loop: false, onPageChanged: changedPages.add));
+      expectItem(tester, 2);
+      await tester.pumpAndSettle();
+      expectItem(tester, 2);
+      expect(changedPages, [2]);
+
+      await swipe(tester, nextPageScrollOffset);
+      expectItem(tester, 2);
+
+      await swipe(tester, previousPageScrollOffset);
+      expectItem(tester, 1);
+      expect(changedPages.last, 1);
+
+      controller.dispose();
+    });
+
+    testWidgets('''given loop is true on the second page
+    when loop is disabled
+    then the second page stays displayed in every frame
+    and swiping stops at both ends''', (tester) async {
+      final changedPages = <int>[];
+      await tester.pumpApp(pageView(loop: true, onPageChanged: changedPages.add));
+      await swipe(tester, nextPageScrollOffset);
+      expectItem(tester, 1);
+
+      await tester.pumpAppFrame(pageView(loop: false, onPageChanged: changedPages.add));
+      expectItem(tester, 1);
+      await tester.pumpAndSettle();
+      expectItem(tester, 1);
+      expect(changedPages, [1]);
+
+      await swipe(tester, nextPageScrollOffset);
+      expectItem(tester, 2);
+      expect(changedPages.last, 2);
+      await swipe(tester, nextPageScrollOffset);
+      expectItem(tester, 2);
+
+      await swipe(tester, previousPageScrollOffset);
+      await swipe(tester, previousPageScrollOffset);
+      expectItem(tester, 0);
+      expect(changedPages.last, 0);
+      await swipe(tester, previousPageScrollOffset);
+      expectItem(tester, 0);
+    });
+
+    testWidgets('''given loop is true on the second page with a PageController
+    when loop is disabled with the same PageController
+    then the PageController controls the page view from the second page''', (tester) async {
+      final controller = PageController();
+      await tester.pumpApp(pageView(loop: true, controller: controller));
+      await swipe(tester, nextPageScrollOffset);
+      expectItem(tester, 1);
+
+      await tester.pumpApp(pageView(loop: false, controller: controller));
+      expectItem(tester, 1);
+      expect(controller.page, closeTo(1.0, 0.01));
+
+      controller.jumpToPage(0);
+      await tester.pumpAndSettle();
+      expectItem(tester, 0);
 
       controller.dispose();
     });

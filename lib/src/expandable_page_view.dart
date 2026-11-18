@@ -162,6 +162,8 @@ class ExpandablePageView extends StatefulWidget {
   /// and [PageController.keepPage]. The regular controller will not be attached
   /// to the PageView.
   ///
+  /// Changing [loop] keeps the current page displayed.
+  ///
   /// Defaults to false.
   final bool loop;
 
@@ -423,59 +425,41 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   /// Handles the transition when loop property changes.
   void _handleLoopChange() {
     final currentRealPage = _realIndex(_currentPage);
+    final PageController controller;
+    final int page;
+    if (widget.loop) {
+      final userController = widget.controller;
+      final loopController = userController is ExpandablePageController
+          ? (userController..itemCount = _itemCount)
+          : _createLoopController(currentRealPage);
+      loopController.startAt(currentRealPage);
+      controller = loopController;
+      page = loopController.initialPage;
+    } else {
+      page = currentRealPage.clamp(0, max(0, _itemCount - 1));
+      controller = _createStandardController(page);
+    }
+
+    _moveScrollPositionTo(page);
     _pageController.removeListener(_updatePage);
     if (_shouldDisposePageController) {
       _pageController.dispose();
     }
+    _pageController = controller..addListener(_updatePage);
+    _shouldDisposePageController = controller != widget.controller;
+    _currentPage = page;
+    _previousPage = page;
+  }
 
-    if (widget.loop) {
-      final expandableController = widget.controller is ExpandablePageController
-          ? widget.controller as ExpandablePageController
-          : null;
-
-      if (expandableController != null) {
-        final oldSize = _sizes[currentRealPage];
-
-        // Re-use the user's ExpandablePageController.
-        // Page resets to controller's initialPage — acceptable for a loop toggle.
-        expandableController.itemCount = _itemCount;
-        _pageController = expandableController;
-        _shouldDisposePageController = false;
-        _currentPage = _pageController.initialPage;
-        _previousPage = _currentPage;
-
-        // Preserve old page size for the new page if it hasn't been measured,
-        // preventing the widget from collapsing to zero height.
-        final newRealPage = _realIndex(_currentPage);
-        if (_sizes[newRealPage] == 0.0 || _sizes[newRealPage] == widget.estimatedPageSize) {
-          _sizes[newRealPage] = oldSize;
-        }
-
-        // The PageView reuses scroll positions, so initialPage alone doesn't
-        // move to the correct page. Jump after the controller is attached.
-        final targetRealPage = newRealPage;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && _pageController.hasClients) {
-            _pageController.jumpToPage(targetRealPage);
-          }
-        });
-      } else {
-        _pageController = _createLoopController(currentRealPage);
-        _shouldDisposePageController = true;
-        _currentPage = _pageController.initialPage;
-        _previousPage = _currentPage;
-      }
-    } else {
-      // When toggling to non-loop mode, always create an internal standard
-      // controller. Don't use ExpandablePageController here because its
-      // initialPage is a virtual index that doesn't work in non-loop mode.
-      _pageController = PageController(initialPage: currentRealPage);
-      _shouldDisposePageController = true;
-      _currentPage = currentRealPage.clamp(0, max(0, _sizes.length - 1));
-      _previousPage = _currentPage;
-    }
-
-    _pageController.addListener(_updatePage);
+  /// PageView keeps its scroll position on a controller swap and ignores the new initialPage.
+  void _moveScrollPositionTo(int page) {
+    final position = _pageController.position;
+    if (!position.hasViewportDimension) return;
+    final viewport = position.viewportDimension;
+    final viewportFraction = _pageController.viewportFraction;
+    // Matches PageView's own offset for pages wider than the viewport.
+    final pageOffset = max(0.0, viewport * (viewportFraction - 1) / 2);
+    position.correctPixels(page * viewport * viewportFraction + pageOffset);
   }
 
   /// Handles controller change while in loop mode.
